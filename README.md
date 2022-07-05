@@ -1,3 +1,5 @@
-Template for python github actions
+GLaDIOS
 
-tests need to have test_
+My personal home assistant project
+
+Using Nerdaxic's tts GLaDOS https://github.com/nerdaxic/glados-tts
