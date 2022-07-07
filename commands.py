@@ -13,7 +13,7 @@ wkey = os.getenv("WEATHER_KEY")
 
 def fetchWeather():
     """
-    Fetches the weather for a given location.
+    Fetches the weather for your ip address.
     """
     loc = geocoder.ip("me")
     lat, lon = loc.latlng
@@ -48,7 +48,7 @@ def toggleLight():
 
 def readEmails():
     """
-    Reads unread emails from the inbox.
+    Reads unread emails from your inbox.
     """
     # Connect to the inbox
     glados_speak("Connecting to your inbox...")
