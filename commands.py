@@ -1,3 +1,4 @@
+from asyncore import read
 import os
 import imaplib
 import email
@@ -88,3 +89,5 @@ def readEmails():
 if __name__ == "__main__":
     fetchWeather("work")
     fetchWeather("home")
+
+    readEmails()
