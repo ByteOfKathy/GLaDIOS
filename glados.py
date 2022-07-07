@@ -34,6 +34,9 @@ def glados_speak(text):
     """
     generates audio from text and plays it
     """
+    # Tokenize, clean and phonemize input text
+    x = prepare_text(text).to("cpu")
+
     # Generate generic TTS-output
     tts_output = glados.generate_jit(x)
 
@@ -59,6 +62,7 @@ def glados_speak(text):
         call(["afplay", "./output.wav"])
 
 
+"""
 while 1:
     text = input("Input: ")
 
@@ -93,3 +97,4 @@ while 1:
             winsound.PlaySound(output_file, winsound.SND_FILENAME)
         else:
             call(["aplay", "./output.wav"])
+"""
