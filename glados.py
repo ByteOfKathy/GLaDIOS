@@ -55,7 +55,8 @@ def glados_speak(text):
     if "winsound" in mod:
         winsound.PlaySound(output_file, winsound.SND_FILENAME)
     else:
-        call(["aplay", "./output.wav"])
+        # macOS
+        call(["afplay", "./output.wav"])
 
 
 while 1:
