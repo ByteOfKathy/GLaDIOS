@@ -1,39 +1,36 @@
-from asyncore import read
 import os
 import imaplib
 import email
-from unicodedata import name
 import requests
 from dotenv import load_dotenv
+
 from glados import glados_speak
+import geocoder
 
 load_dotenv("secrets.env")
 wkey = os.getenv("WEATHER_KEY")
 
 
-def fetchWeather(loc: str):
+def fetchWeather():
     """
     Fetches the weather for a given location.
     """
-    if loc == "work":
-        lat = os.getenv("WORK_LAT")
-        lon = os.getenv("WORK_LON")
-    elif loc == "home":
-        lat = os.getenv("HOME_LAT")
-        lon = os.getenv("HOME_LON")
-    else:
+    loc = geocoder.ip("me")
+    lat, lon = loc.latlng
+
+    if not lat or not lon:
         raise ValueError("Invalid location")
-    url = "https://api.openweathermap.org/data/2.5/onecall?lat={}&lon={}&exclude=minutely,hourly,alerts&units=imperial&appid={}".format(
+    url = "https://api.openweathermap.org/data/2.5/onecall?lat={:0.2f}&lon={:0.2f}&exclude=minutely,hourly,alerts&units=imperial&appid={}".format(
         lat, lon, wkey
     )
     response = requests.get(url)
     data = response.json()
     try:
-        temp = data["current"]["temp"]
-        feelslike = data["current"]["feels_like"]
+        temp = round(data["current"]["temp"])
+        feelslike = round(data["current"]["feels_like"])
         weather = data["current"]["weather"][0]["description"]
-        maxTemp = data["daily"][0]["temp"]["max"]
-        minTemp = data["daily"][0]["temp"]["min"]
+        maxTemp = round(data["daily"][0]["temp"]["max"])
+        minTemp = round(data["daily"][0]["temp"]["min"])
     except KeyError as e:
         raise ValueError("Invalid response from API") from e
 
@@ -44,15 +41,8 @@ def fetchWeather(loc: str):
     glados_speak(ret)
 
 
+# TODO: light integration
 def toggleLight():
-    pass
-
-
-def nextClass():
-    pass
-
-
-def editClass():
     pass
 
 
@@ -91,8 +81,10 @@ def readEmails():
         glados_speak("No unread emails. You monster.")
 
 
+# main to test functions
 if __name__ == "__main__":
     # fetchWeather("work")
-    # fetchWeather("home")
+    fetchWeather()
 
     # readEmails()
+    pass
