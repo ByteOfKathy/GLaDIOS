@@ -1,5 +1,4 @@
 import commands
-import geocoder
 
 # def test_failing():
 #     assert False

@@ -46,6 +46,21 @@ def toggleLight():
     pass
 
 
+# TODO: calendar integration with google
+def fetchCalendar():
+    """
+    Fetches the calendar for your account.
+    """
+    pass
+
+
+def addEventCalendar():
+    """
+    Adds an event to your calendar.
+    """
+    pass
+
+
 def readEmails():
     """
     Reads unread emails from your inbox.
