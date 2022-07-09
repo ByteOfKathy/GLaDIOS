@@ -4,3 +4,5 @@ venv/
 *.wav
 audio/*
 secrets.env
+google_creds.json
+token.json

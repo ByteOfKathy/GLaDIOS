@@ -1,7 +1,6 @@
 import torch
 from utils.tools import prepare_text
 from scipy.io.wavfile import write
-import time
 from sys import modules as mod
 
 try:
