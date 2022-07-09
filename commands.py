@@ -148,7 +148,7 @@ def fetchCalendar():
         # TODO: prompt the user to list the next event, delete the current event, or stop listing events
         # service.events().delete(calendarId="primary", eventId=event["id"]).execute() code to delete event
     glados_speak(
-        "Well... that looks like the next set of events. and Remember, the Aperture Science Bring Your Daughter to Work Day is the perfect time to have her tested"
+        "Well... that looks like the next set of events. and Remember the Aperture Science Bring Your Daughter to Work Day is the perfect time to have her tested"
     )
 
 
