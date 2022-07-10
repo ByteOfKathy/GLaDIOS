@@ -12,6 +12,7 @@ import requests
 import geocoder
 
 # calendar integration
+import calendar
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -82,9 +83,9 @@ def readEmails():
                 mail.store(i, "+FLAGS", "\\Seen")
             """
             # delete/skip the email
-            glados_speak("Would you like to delete or skip the email?")
-            answer = input("d/s: ")
-            if answer == "d":
+            glados_speak("Would you like to delete the email?")
+            answer = input("y/n: ")
+            if answer == "y":
                 mail.store(i, "+FLAGS", "\\Deleted")
 
             glados_speak("fetching next email...")
@@ -144,7 +145,23 @@ def fetchCalendar():
         glados_speak("No upcoming events found.")
     for event in events:
         start = event["start"].get("dateTime", event["start"].get("date"))
-        glados_speak("At {}. You have. {}".format(start, event["summary"]))
+        if "T" in start:
+            # events that are not all day
+            day = start.split("T")[0].split("-")[1:]
+            time = start[-14:-6]
+            glados_speak(
+                "On {} {}, at {} you have {}".format(
+                    calendar.month_name[int(day[0])], day[1], time, event["summary"]
+                )
+            )
+        else:
+            # all day events
+            day = start.split("-")[1:]
+            glados_speak(
+                "On {} {}, all day, you have {}".format(
+                    calendar.month_name[int(day[0])], day[1], event["summary"]
+                )
+            )
         # TODO: prompt the user to list the next event, delete the current event, or stop listing events
         # service.events().delete(calendarId="primary", eventId=event["id"]).execute() code to delete event
     glados_speak(
@@ -162,19 +179,29 @@ def addEventCalendar(summary: str, startDate: str, startTime: str):
         hours=1
     )
     dTime = datetime.datetime.strptime(
-        "{} {}".format(startDate, startTime), "%Y-%m-%dT%H:%M"
+        "{}T{}".format(startDate, startTime), "%Y-%m-%dT%H:%M"
     )
-
     # login to calendar and create event
     creds = loginCalendar()
     service = build("calendar", "v3", credentials=creds)
     event = {
         "summary": summary,
         "start": {
-            "dateTime": "{}-{}".format(
-                dTime.strftime("%Y-%m-%dT%H:%M"), endTime.strftime("%H:%M")
+            "dateTime": "{}T{}:00-04:00".format(
+                dTime.strftime("%Y-%m-%d"),
+                startTime,
             ),
             "timeZone": "America/New_York",
+        },
+        "end": {
+            "dateTime": "{}T{}:00-04:00".format(
+                dTime.strftime("%Y-%m-%d"),
+                endTime.strftime("%H:%M"),
+            ),
+            "timeZone": "America/New_York",
+        },
+        "reminders": {
+            "useDefault": True,
         },
     }
     event = service.events().insert(calendarId="primary", body=event).execute()
@@ -209,5 +236,6 @@ if __name__ == "__main__":
     # fetchWeather()
 
     # readEmails()
-    loginCalendar()
+    # fetchCalendar()
+    addEventCalendar("test", "2022-07-11", "12:00")
     pass
