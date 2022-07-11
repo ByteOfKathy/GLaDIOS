@@ -1,5 +1,7 @@
 import datetime
 import os
+import random
+from time import time
 from dotenv import load_dotenv
 from glados import glados_speak
 
@@ -53,10 +55,23 @@ def fetchWeather():
     glados_speak(ret)
 
 
-def readEmails():
+def readEmails(timeframe: str):
     """
-    Reads unread emails from your inbox.
+    Reads unread emails from your inbox based on the timeframe up to the next 10 events.
     """
+    validTimeframes = {
+        "day": datetime.timedelta(days=1),
+        "week": datetime.timedelta(weeks=1),
+        "month": datetime.timedelta(months=1),
+    }
+    currentTime = datetime.datetime.now()
+    if timeframe not in validTimeframes.keys():
+        glados_speak(
+            "You're not a good person. You know that, right? You couldn't even give me a valid timeframe, so I decided to give you one."
+        )
+        timeframe = random.choice(list(validTimeframes.keys()))
+    else:
+        timeframe = validTimeframes[timeframe]
     # Connect to the inbox
     glados_speak("Connecting to your inbox...")
     mail = imaplib.IMAP4_SSL("imap.gmail.com")
@@ -71,24 +86,34 @@ def readEmails():
             _, data = mail.fetch(i, "(RFC822)")
             raw = data[0][1]
             msg = email.message_from_bytes(raw)
-            glados_speak("email from {} about {}.".format(msg["from"], msg["subject"]))
-            """
-            # TODO: Read the email and respond accordingly
-            answer = input("y/n: ")
-            if answer == "y":
-                for part in msg.walk():
-                    if part.get_content_type() == "text/plain":
-                        body = part.get_payload(decode=True)
-                        glados_speak(str(body).strip())
-                mail.store(i, "+FLAGS", "\\Seen")
-            """
-            # delete/skip the email
-            glados_speak("Would you like to delete the email?")
-            answer = input("y/n: ")
-            if answer == "y":
-                mail.store(i, "+FLAGS", "\\Deleted")
-
-            glados_speak("fetching next email...")
+            # TODO: check how the emails are organized in the list
+            if (
+                currentTime
+                - datetime.datetime.strptime(msg["Date"], "%a, %d %b %Y %H:%M:%S %z")
+                < timeframe
+            ):
+                glados_speak(
+                    "Received an email from {} about {} on {}.".format(
+                        msg["from"], msg["subject"], msg["date"]
+                    )
+                )
+                """
+                # TODO: Read the email and respond accordingly
+                answer = input("y/n: ")
+                if answer == "y":
+                    for part in msg.walk():
+                        if part.get_content_type() == "text/plain":
+                            body = part.get_payload(decode=True)
+                            glados_speak(str(body).strip())
+                    mail.store(i, "+FLAGS", "\\Seen")
+                
+                    # delete/skip the email
+                    glados_speak("Would you like to delete the email?")
+                    answer = input("y/n: ")
+                    if answer == "y":
+                        mail.store(i, "+FLAGS", "\\Deleted")
+                """
+                glados_speak("fetching next email...")
         glados_speak("Well... that looks like all the emails. You monster.")
     else:
         glados_speak("No unread emails. You monster.")
