@@ -1,5 +1,7 @@
 import datetime
 import os
+import random
+from time import time
 from dotenv import load_dotenv
 from glados import glados_speak
 import speech_recognition
@@ -65,8 +67,21 @@ def fetchWeather():
 
 def readEmails(quickRead=False):
     """
-    Reads unread emails from your inbox.
+    Reads unread emails from your inbox based on the timeframe up to the next 10 events.
     """
+    validTimeframes = {
+        "day": datetime.timedelta(days=1),
+        "week": datetime.timedelta(weeks=1),
+        "month": datetime.timedelta(months=1),
+    }
+    currentTime = datetime.datetime.now()
+    if timeframe not in validTimeframes.keys():
+        glados_speak(
+            "You're not a good person. You know that, right? You couldn't even give me a valid timeframe, so I decided to give you one."
+        )
+        timeframe = random.choice(list(validTimeframes.keys()))
+    else:
+        timeframe = validTimeframes[timeframe]
     # Connect to the inbox
     glados_speak("Connecting to your inbox...")
     mail = imaplib.IMAP4_SSL("imap.gmail.com")
