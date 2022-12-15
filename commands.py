@@ -2,6 +2,8 @@ import datetime
 import os
 from dotenv import load_dotenv
 from glados import glados_speak
+import speech_recognition
+import time
 
 # read emails
 import imaplib
@@ -19,6 +21,14 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
 load_dotenv("secrets.env")
+recognizer = speech_recognition.speech_recognition.Recognizer()
+try:
+    mic = speech_recognition.Microphone()
+
+except speech_recognition.UnknownValueError() as e:
+    print(str(e))
+    print("mic not found")
+    exit(1)
 
 
 def fetchWeather():
@@ -53,7 +63,7 @@ def fetchWeather():
     glados_speak(ret)
 
 
-def readEmails():
+def readEmails(quickRead=False):
     """
     Reads unread emails from your inbox.
     """
@@ -66,32 +76,46 @@ def readEmails():
     ids = data[0]
     id_list = ids.split()
     if len(id_list) > 0:
-        glados_speak("Reading your emails...")
+        glados_speak("Accessing your emails...")
         for i in id_list:
             _, data = mail.fetch(i, "(RFC822)")
             raw = data[0][1]
             msg = email.message_from_bytes(raw)
             glados_speak("email from {} about {}.".format(msg["from"], msg["subject"]))
+            # TODO: test Read the email and respond accordingly
+            if not quickRead:
+                glados_speak("would you like me to read it?")
+                answer = input("yes/no: ")
             """
-            # TODO: Read the email and respond accordingly
-            answer = input("y/n: ")
-            if answer == "y":
+            recognizer.adjust_for_ambient_noise(mic, duration=0.5)
+            audio = recognizer.listen(mic)
+            answer = recognizer.recognize_google(audio).lower()
+            """
+            if answer == "yes":
                 for part in msg.walk():
                     if part.get_content_type() == "text/plain":
                         body = part.get_payload(decode=True)
                         glados_speak(str(body).strip())
                 mail.store(i, "+FLAGS", "\\Seen")
+
+            if not quickRead:
+                # delete/skip the email
+                glados_speak("Would you like to delete the email?")
+                answer = input("yes/no: ")
             """
-            # delete/skip the email
-            glados_speak("Would you like to delete the email?")
-            answer = input("y/n: ")
-            if answer == "y":
+            recognizer.adjust_for_ambient_noise(mic, duration=0.5)
+            audio = recognizer.listen(mic)
+            answer = recognizer.recognize_google(audio).lower()
+            """
+            if answer == "yes":
                 mail.store(i, "+FLAGS", "\\Deleted")
 
-            glados_speak("fetching next email...")
-        glados_speak("Well... that looks like all the emails. You monster.")
+            glados_speak("baking more cakes and fetching the next email")
+        glados_speak(
+            "Well... that looks like all the emails. Back to warming up the neurotoxin emitters ... cakes, I mean cakes"
+        )
     else:
-        glados_speak("No unread emails. You monster.")
+        glados_speak("Your inbox is empty and I'm all out of cake mix. Lucky you.")
     mail.close()
     mail.logout()
 
@@ -134,7 +158,7 @@ def fetchCalendar():
         .list(
             calendarId="primary",
             timeMin=now,
-            maxResults=10,
+            maxResults=5,
             singleEvents=True,
             orderBy="startTime",
         )
@@ -162,8 +186,21 @@ def fetchCalendar():
                     calendar.month_name[int(day[0])], day[1], event["summary"]
                 )
             )
-        # TODO: prompt the user to list the next event, delete the current event, or stop listing events
-        # service.events().delete(calendarId="primary", eventId=event["id"]).execute() code to delete event
+        # TODO: prompt the user to delete the current event or stop listing events
+        glados_speak(
+            "If you would like to stop or delete an event let me know or forever hold your grief cake"
+        )
+        """
+        recognizer.adjust_for_ambient_noise(mic, duration=0.5)
+        audio = recognizer.listen(mic)
+        answer = recognizer.recognize_google(audio).lower()
+        """
+        time.sleep(1)
+        answer = ""
+        if answer is "delete":
+            service.events().delete(calendarId="primary", eventId=event["id"]).execute()
+        elif answer is "stop":
+            return
     glados_speak(
         "Well... that looks like the next set of events. and Remember the Aperture Science Bring Your Daughter to Work Day is the perfect time to have her tested"
     )
@@ -210,6 +247,14 @@ def addEventCalendar(summary: str, startDate: str, startTime: str):
     )
 
 
+def addEventCalendar(startDate: str, startTime: str):
+    recognizer.adjust_for_ambient_noise(mic, duration=0.5)
+    audio = recognizer.listen(mic)
+    answer = recognizer.recognize_google(audio).lower()
+
+    addEventCalendar(answer, startDate, startTime)
+
+
 # TODO: light integration
 def toggleLight():
     pass
@@ -226,6 +271,13 @@ def addToLedger():
 def removeFromLedger():
     """
     Removes an entry from your ledger.
+    """
+    pass
+
+
+def readLedger():
+    """
+    reads all entries from your ledger.
     """
     pass
 

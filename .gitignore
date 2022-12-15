@@ -6,3 +6,4 @@ audio/*
 secrets.env
 google_creds.json
 token.json
+*-test.py

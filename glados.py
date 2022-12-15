@@ -29,7 +29,7 @@ for i in range(4):
     init_vo = vocoder(init_mel)
 
 
-def glados_speak(text):
+def glados_speak(text: str):
     """
     generates audio from text and plays it
     """
