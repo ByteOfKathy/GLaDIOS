@@ -6,9 +6,7 @@ My personal home assistant project
 
 Using Nerdaxic's tts [GLaDOS](https://github.com/nerdaxic/glados-tts)
 
-## Requirements
-
-`Python 3.10+`
+## Requirements and Setup
 
 You will need to create a `google_creds.json` file and supply your own credentials from [google](https://console.cloud.google.com/apis/credentials). It should be in the format:
 
@@ -29,10 +27,12 @@ You will need to create a `google_creds.json` file and supply your own credentia
 You will also need to supply `Gladios` with your own environment variables.
 
 `WEATHER_KEY` - The key for [openweathermap](https://openweathermap.org/api)
+
 `EMAIL_PASS` - The key for your [gmail account](https://console.cloud.google.com/apis/credentials)
+
 `EMAIL_ADD` - Your gmail address
 
-## Setup
+## Running
 
 1. Create your venv
 

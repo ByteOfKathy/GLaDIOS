@@ -1,4 +1,5 @@
 import commands
+import datetime as dt
 
 # def test_failing():
 #     assert False
@@ -31,6 +32,14 @@ def test_fetchWeather():
     assert True
 
 
+def test_loginCalendar():
+    try:
+        commands.loginCalendar()
+    except Exception as e:
+        assert False, e.args[0]
+    assert True
+
+
 def test_readEmails():
     try:
         commands.readEmails(True)
@@ -38,8 +47,22 @@ def test_readEmails():
         assert False, e.args[0]
     assert True
 
+
 def test_fetchCalender():
-    
+    try:
+        commands.fetchCalender()
+    except Exception as e:
+        assert False, e.args[0]
+    assert True
+
+
+def test_addEventCalendar():
+    try:
+        # add an event to the calendar specifying the start date and start time as now
+        commands.addEventCalendar("Test Event", dt.datetime.now(), dt.datetime.now())
+    except Exception as e:
+        assert False, e.args[0]
+    assert True
 
 
 if __name__ == "__main__":

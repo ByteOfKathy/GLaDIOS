@@ -7,6 +7,9 @@ from glados import glados_speak
 import speech_recognition
 import time
 
+# custom types
+import types
+
 # read emails
 import imaplib
 import email
@@ -221,34 +224,32 @@ def fetchCalendar():
     )
 
 
-def addEventCalendar(summary: str, startDate: str, startTime: str):
+# TODO: test this
+def addEventCalendar(summary: str, startDate: str):
     """
     Adds an event to your calendar.
     """
     creds = loginCalendar()
-    # store the start startDate, startTime, and endTime in a datetime object
-    endTime = datetime.datetime.strptime(startTime, "%H:%M") + datetime.timedelta(
-        hours=1
-    )
-    dTime = datetime.datetime.strptime(
-        "{}T{}".format(startDate, startTime), "%Y-%m-%dT%H:%M"
-    )
+    # store the start startTime and endTime in a datetime object
+    eTime = datetime.datetime.strptime(startDate) + datetime.timedelta(hours=1)
+    sTime = datetime.datetime.strptime(startDate, "%Y-%m-%dT%H:%M")
     # login to calendar and create event
+    # TODO: daylight savings time
     creds = loginCalendar()
     service = build("calendar", "v3", credentials=creds)
     event = {
         "summary": summary,
         "start": {
             "dateTime": "{}T{}:00-04:00".format(
-                dTime.strftime("%Y-%m-%d"),
-                startTime,
+                sTime.strftime("%Y-%m-%d"),
+                sTime.strftime("%H:%M"),
             ),
             "timeZone": "America/New_York",
         },
         "end": {
             "dateTime": "{}T{}:00-04:00".format(
-                dTime.strftime("%Y-%m-%d"),
-                endTime.strftime("%H:%M"),
+                eTime.strftime("%Y-%m-%d"),
+                eTime.strftime("%H:%M"),
             ),
             "timeZone": "America/New_York",
         },
@@ -262,16 +263,29 @@ def addEventCalendar(summary: str, startDate: str, startTime: str):
     )
 
 
-def addEventCalendar(startDate: str, startTime: str):
+def addEventCalendar(startDate: str):
+
+    glados_speak("What would you like to name the event?")
     recognizer.adjust_for_ambient_noise(mic, duration=0.5)
     audio = recognizer.listen(mic)
     answer = recognizer.recognize_google(audio).lower()
+    # TODO: extract date and time from answer
 
-    addEventCalendar(answer, startDate, startTime)
+    addEventCalendar(answer, startDate)
 
 
 # TODO: light integration
-def toggleLight():
+def toggleLight(state=types.LightState.DEFAULT):
+    # state overrides the current state of the light
+    if state == types.LightState.DEFAULT:
+        # toggle the light
+        pass
+    elif state == types.LightState.ON:
+        # turn the light on
+        pass
+    elif state == types.LightState.OFF:
+        # turn the light off
+        pass
     pass
 
 
