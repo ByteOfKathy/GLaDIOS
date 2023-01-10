@@ -4,7 +4,6 @@ import random
 from time import time
 from dotenv import load_dotenv
 from glados import glados_speak
-import speech_recognition
 import time
 
 # custom types
@@ -26,25 +25,21 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
 load_dotenv("secrets.env")
-recognizer = speech_recognition.speech_recognition.Recognizer()
-try:
-    mic = speech_recognition.Microphone()
+tzone = time.tzname[time.daylight]
 
-except speech_recognition.UnknownValueError() as e:
-    print(str(e))
-    print("mic not found")
-    exit(1)
-
-
-def fetchWeather():
+def fetchWeather(location = None, lat = None, lon = None, address = None):
     """
     Fetches the weather for your ip address.
     """
-    loc = geocoder.ip("me")
-    lat, lon = loc.latlng
+    if location:
+        loc = geocoder.ip(location)
+        lat, lon = loc.latlng
+    elif address:
+        loc = geocoder.osm(address)
+        lat, lon = loc.latlng
 
     if not lat or not lon:
-        raise ValueError("Invalid location")
+        raise ValueError("Invalid location, did you forget to add some sort of location?")
     url = "https://api.openweathermap.org/data/2.5/onecall?lat={:0.2f}&lon={:0.2f}&exclude=minutely,hourly,alerts&units=imperial&appid={}".format(
         lat, lon, os.getenv("WEATHER_KEY")
     )
@@ -68,7 +63,7 @@ def fetchWeather():
     glados_speak(ret)
 
 
-def readEmails(quickRead=False):
+def readEmails(quickRead=False, timeframe=None):
     """
     Reads unread emails from your inbox based on the timeframe up to the next 10 events.
     """
@@ -80,7 +75,7 @@ def readEmails(quickRead=False):
     currentTime = datetime.datetime.now()
     if timeframe not in validTimeframes.keys():
         glados_speak(
-            "You're not a good person. You know that, right? You couldn't even give me a valid timeframe, so I decided to give you one."
+            "You're not a good person. You know that, right? You couldn't even give a valid timeframe, so I decided to give you one."
         )
         timeframe = random.choice(list(validTimeframes.keys()))
     else:
@@ -104,11 +99,6 @@ def readEmails(quickRead=False):
             if not quickRead:
                 glados_speak("would you like me to read it?")
                 answer = input("yes/no: ")
-            """
-            recognizer.adjust_for_ambient_noise(mic, duration=0.5)
-            audio = recognizer.listen(mic)
-            answer = recognizer.recognize_google(audio).lower()
-            """
             if answer == "yes":
                 for part in msg.walk():
                     if part.get_content_type() == "text/plain":
@@ -120,11 +110,6 @@ def readEmails(quickRead=False):
                 # delete/skip the email
                 glados_speak("Would you like to delete the email?")
                 answer = input("yes/no: ")
-            """
-            recognizer.adjust_for_ambient_noise(mic, duration=0.5)
-            audio = recognizer.listen(mic)
-            answer = recognizer.recognize_google(audio).lower()
-            """
             if answer == "yes":
                 mail.store(i, "+FLAGS", "\\Deleted")
 
@@ -310,6 +295,8 @@ def readLedger():
     """
     pass
 
+def fetchTime():
+    glados_speak("It is {}".format(datetime.datetime.now().strftime("%H:%M")))
 
 # main to test functions
 if __name__ == "__main__":
@@ -318,5 +305,12 @@ if __name__ == "__main__":
 
     # readEmails()
     # fetchCalendar()
-    addEventCalendar("test", "2022-07-11", "12:00")
+    # addEventCalendar("test", "2022-07-11", "12:00")
+    # toggleLight(types.LightState.ON)
+    # toggleLight(types.LightState.OFF)
+    # toggleLight(types.LightState.DEFAULT)
+    # addToLedger()
+    # removeFromLedger()
+    # readLedger()
+    # fetchTime()
     pass
