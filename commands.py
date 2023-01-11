@@ -25,7 +25,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
 load_dotenv("secrets.env")
-tzone = time.tzname[time.daylight]
+# tzone = time.tzname[time.daylight]
 
 def fetchWeather(location = None, lat = None, lon = None, address = None):
     """
