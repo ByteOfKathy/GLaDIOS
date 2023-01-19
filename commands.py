@@ -2,9 +2,11 @@ import datetime
 import os
 import random
 from time import time
+import pytz
+from datetime import datetime
 from dotenv import load_dotenv
 from glados import glados_speak
-import time
+import speech_recognition as sr
 
 # custom types
 import types
@@ -25,9 +27,18 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
 load_dotenv("secrets.env")
-# tzone = time.tzname[time.daylight]
+recognizer = sr.Recognizer()
 
-def fetchWeather(location = None, lat = None, lon = None, address = None):
+
+def is_dst(dt=None, timezone="UTC"):
+    if dt is None:
+        dt = datetime.utcnow()
+    timezone = pytz.timezone(timezone)
+    timezone_aware_date = timezone.localize(dt, is_dst=None)
+    return timezone_aware_date.tzinfo._dst.seconds != 0
+
+
+def fetchWeather(location=None, lat=None, lon=None, address=None):
     """
     Fetches the weather for your ip address.
     """
@@ -39,7 +50,9 @@ def fetchWeather(location = None, lat = None, lon = None, address = None):
         lat, lon = loc.latlng
 
     if not lat or not lon:
-        raise ValueError("Invalid location, did you forget to add some sort of location?")
+        raise ValueError(
+            "Invalid location, did you forget to add some sort of location?"
+        )
     url = "https://api.openweathermap.org/data/2.5/onecall?lat={:0.2f}&lon={:0.2f}&exclude=minutely,hourly,alerts&units=imperial&appid={}".format(
         lat, lon, os.getenv("WEATHER_KEY")
     )
@@ -115,7 +128,7 @@ def readEmails(quickRead=False, timeframe=None):
 
             glados_speak("baking more cakes and fetching the next email")
         glados_speak(
-            "Well... that looks like all the emails. Back to warming up the neurotoxin emitters ... cakes, I mean cakes"
+            "Well... that looks like all the emails. Back to warming up the neurotoxin emitters ... cakes, I mean baking cakes"
         )
     else:
         glados_speak("Your inbox is empty and I'm all out of cake mix. Lucky you.")
@@ -214,7 +227,10 @@ def addEventCalendar(summary: str, startDate: str):
     """
     Adds an event to your calendar.
     """
-    creds = loginCalendar()
+    if summary is None:
+        recognizer.adjust_for_ambient_noise(mic, duration=0.5)
+        audio = recognizer.listen(mic)
+        summary = recognizer.recognize_google(audio).lower()
     # store the start startTime and endTime in a datetime object
     eTime = datetime.datetime.strptime(startDate) + datetime.timedelta(hours=1)
     sTime = datetime.datetime.strptime(startDate, "%Y-%m-%dT%H:%M")
@@ -222,19 +238,18 @@ def addEventCalendar(summary: str, startDate: str):
     # TODO: daylight savings time
     creds = loginCalendar()
     service = build("calendar", "v3", credentials=creds)
+    offset = "04:00" if is_dst() else "05:00"
     event = {
         "summary": summary,
         "start": {
-            "dateTime": "{}T{}:00-04:00".format(
-                sTime.strftime("%Y-%m-%d"),
-                sTime.strftime("%H:%M"),
+            "dateTime": "{}T{}:00-{}".format(
+                sTime.strftime("%Y-%m-%d"), sTime.strftime("%H:%M"), offset
             ),
             "timeZone": "America/New_York",
         },
         "end": {
-            "dateTime": "{}T{}:00-04:00".format(
-                eTime.strftime("%Y-%m-%d"),
-                eTime.strftime("%H:%M"),
+            "dateTime": "{}T{}:00-{}".format(
+                eTime.strftime("%Y-%m-%d"), eTime.strftime("%H:%M"), offset
             ),
             "timeZone": "America/New_York",
         },
@@ -246,17 +261,6 @@ def addEventCalendar(summary: str, startDate: str):
     glados_speak(
         "Event created. You might want to check your calendar. Cake, and grief counseling, will be available upon checking."
     )
-
-
-def addEventCalendar(startDate: str):
-
-    glados_speak("What would you like to name the event?")
-    recognizer.adjust_for_ambient_noise(mic, duration=0.5)
-    audio = recognizer.listen(mic)
-    answer = recognizer.recognize_google(audio).lower()
-    # TODO: extract date and time from answer
-
-    addEventCalendar(answer, startDate)
 
 
 # TODO: light integration
@@ -295,8 +299,10 @@ def readLedger():
     """
     pass
 
+
 def fetchTime():
     glados_speak("It is {}".format(datetime.datetime.now().strftime("%H:%M")))
+
 
 # main to test functions
 if __name__ == "__main__":
