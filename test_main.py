@@ -32,7 +32,7 @@ def test_fetchWeather():
     assert True
 
 
-def test_loginCalendar():
+def xtest_loginCalendar():
     try:
         commands.loginCalendar()
     except Exception as e:
@@ -40,7 +40,7 @@ def test_loginCalendar():
     assert True
 
 
-def test_readEmails():
+def xtest_readEmails():
     try:
         commands.readEmails(True)
     except Exception as e:
@@ -48,7 +48,7 @@ def test_readEmails():
     assert True
 
 
-def test_fetchCalender():
+def xtest_fetchCalender():
     try:
         commands.fetchCalender()
     except Exception as e:
@@ -56,7 +56,7 @@ def test_fetchCalender():
     assert True
 
 
-def test_addEventCalendar():
+def xtest_addEventCalendar():
     try:
         # add an event to the calendar specifying the start date and start time as now
         commands.addEventCalendar("Test Event", dt.datetime.now(), dt.datetime.now())

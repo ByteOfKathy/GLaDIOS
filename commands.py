@@ -304,6 +304,20 @@ def fetchTime():
     glados_speak("It is {}".format(datetime.datetime.now().strftime("%H:%M")))
 
 
+def remind(time, reason):
+    """
+    Reminds you of something at a certain time.
+    """
+    pass
+
+
+def shutdownComputer(computer):
+    """
+    Shuts down a computer.
+    """
+    pass
+
+
 # main to test functions
 if __name__ == "__main__":
     # fetchWeather("work")
