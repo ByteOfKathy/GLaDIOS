@@ -3,6 +3,11 @@ from utils.tools import prepare_text
 from scipy.io.wavfile import write
 from sys import modules as mod
 
+# from audioplayer import AudioPlayer
+from phonemizer import phonemize
+from phonemizer.separator import Separator
+import os
+
 try:
     import winsound
 except ImportError:
@@ -54,6 +59,8 @@ def glados_speak(text: str):
     write(output_file, 22050, audio)
 
     # Play audio file
+    # AudioPlayer(output_file).play(block=True)
+
     if "winsound" in mod:
         winsound.PlaySound(output_file, winsound.SND_FILENAME)
     else:
@@ -97,3 +104,5 @@ while 1:
         else:
             call(["aplay", "./output.wav"])
 """
+if __name__ == "__main__":
+    glados_speak("Hello, I am GLaDOS. How are you doing today?")

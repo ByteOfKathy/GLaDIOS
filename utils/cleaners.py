@@ -7,34 +7,39 @@ from utils.symbols import phonemes_set
 from unidecode import unidecode
 
 # Regular expression matching whitespace:
-_whitespace_re = re.compile(r'\s+')
+_whitespace_re = re.compile(r"\s+")
 
 # List of (regular expression, replacement) pairs for abbreviations:
-_abbreviations = [(re.compile('\\b%s\\.' % x[0], re.IGNORECASE), x[1]) for x in [
-    ('mrs', 'misess'),
-    ('mr', 'mister'),
-    ('dr', 'doctor'),
-    ('st', 'saint'),
-    ('co', 'company'),
-    ('jr', 'junior'),
-    ('maj', 'major'),
-    ('gen', 'general'),
-    ('drs', 'doctors'),
-    ('rev', 'reverend'),
-    ('lt', 'lieutenant'),
-    ('hon', 'honorable'),
-    ('sgt', 'sergeant'),
-    ('capt', 'captain'),
-    ('esq', 'esquire'),
-    ('ltd', 'limited'),
-    ('col', 'colonel'),
-    ('ft', 'fort'),
-]]
+_abbreviations = [
+    (re.compile("\\b%s\\." % x[0], re.IGNORECASE), x[1])
+    for x in [
+        ("mrs", "misess"),
+        ("mr", "mister"),
+        ("dr", "doctor"),
+        ("st", "saint"),
+        ("co", "company"),
+        ("jr", "junior"),
+        ("maj", "major"),
+        ("gen", "general"),
+        ("drs", "doctors"),
+        ("rev", "reverend"),
+        ("lt", "lieutenant"),
+        ("hon", "honorable"),
+        ("sgt", "sergeant"),
+        ("capt", "captain"),
+        ("esq", "esquire"),
+        ("ltd", "limited"),
+        ("col", "colonel"),
+        ("ft", "fort"),
+    ]
+]
+
 
 def expand_abbreviations(text):
     for regex, replacement in _abbreviations:
         text = re.sub(regex, replacement, text)
     return text
+
 
 def expand_units(text):
     text = text.replace("°C", "degrees selsius")
@@ -47,8 +52,9 @@ def expand_units(text):
     text = text.replace("% (RH)", "percent relative humidity")
     return text
 
+
 def collapse_whitespace(text):
-    return re.sub(_whitespace_re, ' ', text)
+    return re.sub(_whitespace_re, " ", text)
 
 
 def no_cleaners(text):
@@ -64,32 +70,32 @@ def english_cleaners(text):
 
 
 def to_phonemes(text: str, lang: str) -> str:
-    phonemes = phonemize(text,
-                         language=lang,
-                         backend='espeak',
-                         strip=True,
-                         preserve_punctuation=True,
-                         with_stress=False,
-                         njobs=1,
-                         punctuation_marks=';:,.!?¡¿—…"«»“”()',
-                         language_switch='remove-flags')
-    phonemes = ''.join([p for p in phonemes if p in phonemes_set])
+    phonemes = phonemize(
+        text,
+        language=lang,
+        backend="espeak",
+        strip=True,
+        preserve_punctuation=True,
+        with_stress=False,
+        njobs=1,
+        punctuation_marks=';:,.!?¡¿—…"«»“”()',
+        language_switch="remove-flags",
+    )
+    phonemes = "".join([p for p in phonemes if p in phonemes_set])
     return phonemes
 
 
 class Cleaner:
-
-    def __init__(self,
-                 cleaner_name: str,
-                 use_phonemes: bool,
-                 lang: str) -> None:
-        if cleaner_name == 'english_cleaners':
+    def __init__(self, cleaner_name: str, use_phonemes: bool, lang: str) -> None:
+        if cleaner_name == "english_cleaners":
             self.clean_func = english_cleaners
-        elif cleaner_name == 'no_cleaners':
+        elif cleaner_name == "no_cleaners":
             self.clean_func = no_cleaners
         else:
-            raise ValueError(f'Cleaner not supported: {cleaner_name}! '
-                             f'Currently supported: [\'english_cleaners\', \'no_cleaners\']')
+            raise ValueError(
+                f"Cleaner not supported: {cleaner_name}! "
+                f"Currently supported: ['english_cleaners', 'no_cleaners']"
+            )
         self.use_phonemes = use_phonemes
         self.lang = lang
 
@@ -102,10 +108,9 @@ class Cleaner:
         return text
 
     @classmethod
-    def from_config(cls, config: Dict[str, Any]) -> 'Cleaner':
+    def from_config(cls, config: Dict[str, Any]) -> "Cleaner":
         return Cleaner(
-            cleaner_name=config['preprocessing']['cleaner_name'],
-            use_phonemes=config['preprocessing']['use_phonemes'],
-            lang=config['preprocessing']['language']
+            cleaner_name=config["preprocessing"]["cleaner_name"],
+            use_phonemes=config["preprocessing"]["use_phonemes"],
+            lang=config["preprocessing"]["language"],
         )
-

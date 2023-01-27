@@ -9,7 +9,7 @@ from glados import glados_speak
 import speech_recognition as sr
 
 # custom types
-import types
+import xtraTypes
 
 # read emails
 import imaplib
@@ -28,6 +28,9 @@ from googleapiclient.discovery import build
 
 load_dotenv("secrets.env")
 recognizer = sr.Recognizer()
+
+# start adding integration for specific locations/places/things
+static_location = os.getenv("STATIC_LOCATION")
 
 
 def is_dst(dt=None, timezone="UTC"):
@@ -213,9 +216,9 @@ def fetchCalendar():
         """
         time.sleep(1)
         answer = ""
-        if answer is "delete":
+        if answer == "delete":
             service.events().delete(calendarId="primary", eventId=event["id"]).execute()
-        elif answer is "stop":
+        elif answer == "stop":
             return
     glados_speak(
         "Well... that looks like the next set of events. and Remember the Aperture Science Bring Your Daughter to Work Day is the perfect time to have her tested"
@@ -266,13 +269,13 @@ def addEventCalendar(summary: str, startDate: str):
 # TODO: light integration
 def toggleLight(state=types.LightState.DEFAULT):
     # state overrides the current state of the light
-    if state == types.LightState.DEFAULT:
+    if state == xtraTypes.LightState.DEFAULT:
         # toggle the light
         pass
-    elif state == types.LightState.ON:
+    elif state == xtraTypes.LightState.ON:
         # turn the light on
         pass
-    elif state == types.LightState.OFF:
+    elif state == xtraTypes.LightState.OFF:
         # turn the light off
         pass
     pass
