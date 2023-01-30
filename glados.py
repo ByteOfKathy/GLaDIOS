@@ -65,7 +65,9 @@ def glados_speak(text: str):
         winsound.PlaySound(output_file, winsound.SND_FILENAME)
     else:
         # macOS
-        call(["afplay", "./output.wav"])
+        # call(["afplay", "./output.wav"])
+        # Linux
+        call(["aplay", "./output.wav"])
 
 
 """
@@ -106,3 +108,6 @@ while 1:
 """
 if __name__ == "__main__":
     glados_speak("Hello, I am GLaDOS. How are you doing today?")
+
+if __name__ == "__main__":
+    glados_speak("Katherine Chan")

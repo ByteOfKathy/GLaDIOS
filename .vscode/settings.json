@@ -5,4 +5,6 @@
     "python.analysis.extraPaths": [
         "./venv/Lib/site-packages"
     ],
+    "editor.tabCompletion": "on",
+    "diffEditor.codeLens": true,
 }
