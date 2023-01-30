@@ -108,6 +108,3 @@ while 1:
 """
 if __name__ == "__main__":
     glados_speak("Hello, I am GLaDOS. How are you doing today?")
-
-if __name__ == "__main__":
-    glados_speak("Katherine Chan")

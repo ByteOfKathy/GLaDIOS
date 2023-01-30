@@ -1,7 +1,7 @@
 import datetime
 import os
 import random
-from time import time
+from datetime import time, timedelta
 import pytz
 from datetime import datetime
 from dotenv import load_dotenv
@@ -29,10 +29,6 @@ from googleapiclient.discovery import build
 load_dotenv("secrets.env")
 recognizer = sr.Recognizer()
 
-# start adding integration for specific locations/places/things
-static_location = os.getenv("STATIC_LOCATION")
-
-
 def is_dst(dt=None, timezone="UTC"):
     if dt is None:
         dt = datetime.utcnow()
@@ -51,11 +47,15 @@ def fetchWeather(location=None, lat=None, lon=None, address=None):
     elif address:
         loc = geocoder.osm(address)
         lat, lon = loc.latlng
+    else:
+        loc = geocoder.ipinfo('me')
+        lat, lon = loc.latlng
 
-    if not lat or not lon:
-        raise ValueError(
-            "Invalid location, did you forget to add some sort of location?"
-        )
+    # if not lat or not lon:
+    #     raise ValueError(
+    #         "Invalid location, did you forget to add some sort of location?"
+    #     )
+
     url = "https://api.openweathermap.org/data/2.5/onecall?lat={:0.2f}&lon={:0.2f}&exclude=minutely,hourly,alerts&units=imperial&appid={}".format(
         lat, lon, os.getenv("WEATHER_KEY")
     )
@@ -71,7 +71,7 @@ def fetchWeather(location=None, lat=None, lon=None, address=None):
     except KeyError as e:
         raise ValueError("Invalid response from API") from e
 
-    ret = "It is currently {} degrees. and feels like {} degrees. The weather is. {}. The high today is {} degrees. and the low is {} degrees. You would know that if you went outside and actually touched grass.".format(
+    ret = "It is currently {} degrees Fahrenheit. and feels like {} degrees Fahrenheit. The weather is. {}. The high today is {} degrees Fahrenheit. and the low is {} degrees Fahrenheit. You would know that if you went outside and actually touched grass.".format(
         temp, feelslike, weather, maxTemp, minTemp
     )
     if "rain" in dailyWeather:
@@ -79,14 +79,14 @@ def fetchWeather(location=None, lat=None, lon=None, address=None):
     glados_speak(ret)
 
 
-def readEmails(quickRead=False, timeframe=None):
+def readEmails(quickRead=True, timeframe=None):
     """
     Reads unread emails from your inbox based on the timeframe up to the next 10 events.
     """
     validTimeframes = {
-        "day": datetime.timedelta(days=1),
-        "week": datetime.timedelta(weeks=1),
-        "month": datetime.timedelta(months=1),
+        "day": timedelta(days=1),
+        "week": timedelta(weeks=1),
+        "month": timedelta(days=31),
     }
     currentTime = datetime.datetime.now()
     if timeframe not in validTimeframes.keys():
@@ -115,19 +115,18 @@ def readEmails(quickRead=False, timeframe=None):
             if not quickRead:
                 glados_speak("would you like me to read it?")
                 answer = input("yes/no: ")
-            if answer == "yes":
-                for part in msg.walk():
-                    if part.get_content_type() == "text/plain":
-                        body = part.get_payload(decode=True)
-                        glados_speak(str(body).strip())
-                mail.store(i, "+FLAGS", "\\Seen")
+                if answer == "yes":
+                    for part in msg.walk():
+                        if part.get_content_type() == "text/plain":
+                            body = part.get_payload(decode=True)
+                            glados_speak(str(body).strip())
+                    mail.store(i, "+FLAGS", "\\Seen")
 
-            if not quickRead:
                 # delete/skip the email
                 glados_speak("Would you like to delete the email?")
                 answer = input("yes/no: ")
-            if answer == "yes":
-                mail.store(i, "+FLAGS", "\\Deleted")
+                if answer == "yes":
+                    mail.store(i, "+FLAGS", "\\Deleted")
 
             glados_speak("baking more cakes and fetching the next email")
         glados_speak(
@@ -267,7 +266,7 @@ def addEventCalendar(summary: str, startDate: str):
 
 
 # TODO: light integration
-def toggleLight(state=types.LightState.DEFAULT):
+def toggleLight(state=xtraTypes.LightState.DEFAULT):
     # state overrides the current state of the light
     if state == xtraTypes.LightState.DEFAULT:
         # toggle the light
@@ -324,7 +323,7 @@ def shutdownComputer(computer):
 # main to test functions
 if __name__ == "__main__":
     # fetchWeather("work")
-    # fetchWeather()
+    fetchWeather()
 
     # readEmails()
     # fetchCalendar()

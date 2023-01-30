@@ -42,7 +42,7 @@ def xtest_loginCalendar():
     assert True
 
 
-def xtest_readEmails():
+def test_readEmails():
     try:
         commands.readEmails(True)
     except Exception as e:
@@ -50,9 +50,9 @@ def xtest_readEmails():
     assert True
 
 
-def xtest_fetchCalender():
+def test_fetchCalender():
     try:
-        commands.fetchCalender()
+        commands.fetchCalendar()
     except Exception as e:
         assert False, e.args[0]
     assert True
