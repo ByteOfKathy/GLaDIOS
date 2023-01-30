@@ -1,17 +1,9 @@
 import commands
 import datetime as dt
-
-# used to test if pytest will run
-
-# def test_failing():
-#     assert False
-
-
-# def test_passing():
-#     assert True
+import pytest
 
 # deprecating until fetchWeather gets static location integration from me
-"""
+@pytest.mark.skip
 def test_fetchWeather():
     try:
         commands.fetchWeather("work")
@@ -23,7 +15,6 @@ def test_fetchWeather():
     except ValueError as e:
         assert False, e.args[0]
     assert True
-"""
 
 
 def test_fetchWeather():
@@ -34,7 +25,8 @@ def test_fetchWeather():
     assert True
 
 
-def xtest_loginCalendar():
+@pytest.mark.skip
+def test_loginCalendar():
     try:
         commands.loginCalendar()
     except Exception as e:
@@ -58,10 +50,19 @@ def test_fetchCalender():
     assert True
 
 
-def xtest_addEventCalendar():
+@pytest.mark.skip
+def test_addEventCalendar():
     try:
         # add an event to the calendar specifying the start date and start time as now
         commands.addEventCalendar("Test Event", dt.datetime.now(), dt.datetime.now())
+    except Exception as e:
+        assert False, e.args[0]
+    assert True
+
+
+def fetchTime():
+    try:
+        commands.fetchTime()
     except Exception as e:
         assert False, e.args[0]
     assert True

@@ -29,6 +29,7 @@ from googleapiclient.discovery import build
 load_dotenv("secrets.env")
 recognizer = sr.Recognizer()
 
+
 def is_dst(dt=None, timezone="UTC"):
     if dt is None:
         dt = datetime.utcnow()
@@ -48,7 +49,7 @@ def fetchWeather(location=None, lat=None, lon=None, address=None):
         loc = geocoder.osm(address)
         lat, lon = loc.latlng
     else:
-        loc = geocoder.ipinfo('me')
+        loc = geocoder.ipinfo("me")
         lat, lon = loc.latlng
 
     # if not lat or not lon:
@@ -101,7 +102,7 @@ def readEmails(quickRead=True, timeframe=None):
     mail = imaplib.IMAP4_SSL("imap.gmail.com")
     mail.login(os.getenv("EMAIL_ADD"), os.getenv("EMAIL_PASS"))
     mail.select("inbox")
-    _, data = mail.search(None, "UNSEEN")
+    _, data = mail.search(charset=None, criteria="UNSEEN")
     ids = data[0]
     id_list = ids.split()
     if len(id_list) > 0:
@@ -205,20 +206,21 @@ def fetchCalendar():
                 )
             )
         # TODO: prompt the user to delete the current event or stop listing events
+        """
         glados_speak(
             "If you would like to stop or delete an event let me know or forever hold your grief cake"
         )
-        """
         recognizer.adjust_for_ambient_noise(mic, duration=0.5)
         audio = recognizer.listen(mic)
         answer = recognizer.recognize_google(audio).lower()
-        """
+        
         time.sleep(1)
         answer = ""
         if answer == "delete":
             service.events().delete(calendarId="primary", eventId=event["id"]).execute()
         elif answer == "stop":
             return
+        """
     glados_speak(
         "Well... that looks like the next set of events. and Remember the Aperture Science Bring Your Daughter to Work Day is the perfect time to have her tested"
     )
