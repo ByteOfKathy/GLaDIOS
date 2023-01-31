@@ -1,4 +1,7 @@
-[![Generic badge](https://img.shields.io/badge/Python-3.10+-<COLOR>.svg)](https://shields.io/)
+<p align="center">
+<a href="https://www.python.org/downloads/release/python-3100/"><img alt="Python-3.10+" src="https://img.shields.io/badge/Python-3.10+-<COLOR>.svg"></a>
+<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+</p>
 
 # GLaDIOS
 
@@ -38,6 +41,9 @@ You will also need to supply `Gladios` with your own environment variables.
 
 ## Running
 
+| :warning: **Warning**: Only tested on Linux systems and WSL |
+| --- |
+
 1. Create your venv
 
 `python3 -m venv ./venv/`
@@ -46,7 +52,12 @@ You will also need to supply `Gladios` with your own environment variables.
 
 `pip install -r requirements.txt`
 
-3. Run
+3. Install espeak on Linux
+
+`sudo apt-get update -y`
+`sudo apt-get install espeak -y`
+
+4. Run
 
 `python3 commands.py`
 
