@@ -231,10 +231,11 @@ def addEventCalendar(summary: str, startDate: str):
     """
     Adds an event to your calendar.
     """
-    if summary is None:
-        recognizer.adjust_for_ambient_noise(mic, duration=0.5)
-        audio = recognizer.listen(mic)
-        summary = recognizer.recognize_google(audio).lower()
+    # TODO: mic input
+    # if summary is None:
+    #     recognizer.adjust_for_ambient_noise(mic, duration=0.5)
+    #     audio = recognizer.listen(mic)
+    #     summary = recognizer.recognize_google(audio).lower()
     # store the start startTime and endTime in a datetime object
     eTime = datetime.datetime.strptime(startDate) + datetime.timedelta(hours=1)
     sTime = datetime.datetime.strptime(startDate, "%Y-%m-%dT%H:%M")
