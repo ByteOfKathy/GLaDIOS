@@ -8,7 +8,7 @@ Using Nerdaxic's tts [GLaDOS](https://github.com/nerdaxic/glados-tts)
 
 ## Requirements and Setup
 
-You will need to create a `google_creds.json` file and supply your own credentials from [google](https://console.cloud.google.com/apis/credentials). It should be in the format:
+You will need to have a `google_creds.json` file and supply your own credentials from [google](https://console.cloud.google.com/apis/credentials) in the main directory. It should be in the format:
 
 ```json
 {
