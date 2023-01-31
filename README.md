@@ -35,10 +35,6 @@ You will also need to supply `Gladios` with your own environment variables.
 
 `EMAIL_ADD` - Your gmail address
 
-`GLADIOS_GEOHOME` - A home address
-
-`GLADIOS_GEOWORK` - A work address
-
 ## Running
 
 | :warning: **Warning**: Only tested on Linux systems and WSL |
