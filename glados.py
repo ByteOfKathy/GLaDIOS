@@ -64,6 +64,7 @@ def glados_speak(text: str):
         except:
             # Play audio file
             from audioplayer import AudioPlayer
+
             AudioPlayer(output_file).play(block=True)
 
 

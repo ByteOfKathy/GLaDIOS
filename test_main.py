@@ -2,7 +2,7 @@ import commands
 import datetime as dt
 import pytest
 
-#TODO: add secrets to github actions
+# TODO: add secrets to github actions
 
 # deprecating until fetchWeather gets static location integration from me
 @pytest.mark.skip
@@ -17,6 +17,7 @@ def test_fetchWeatherLocations():
     except ValueError as e:
         assert False, e.args[0]
     assert True
+
 
 def test_fetchWeather():
     try:
@@ -33,6 +34,7 @@ def test_loginCalendar():
     except Exception as e:
         assert False, e.args[0]
     assert True
+
 
 @pytest.mark.skip
 def test_readEmails():

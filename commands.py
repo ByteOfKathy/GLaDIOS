@@ -83,7 +83,7 @@ def fetchWeather(location=None, lat=None, lon=None, address=None):
 def readEmails(quickRead=True, timeframe=None):
     """
     Reads unread emails from your inbox based on the timeframe up to the next 10 events.
-    
+
     Parameters
     ----------
     quickRead: bool
@@ -121,7 +121,11 @@ def readEmails(quickRead=True, timeframe=None):
                 _, data = mail.fetch(i, "(RFC822)")
                 raw = data[0][1]
                 msg = email.message_from_bytes(raw)
-                glados_speak("email from {} about {}.".format(msg["from"].split('@')[0], msg["subject"]))
+                glados_speak(
+                    "email from {} about {}.".format(
+                        msg["from"].split("@")[0], msg["subject"]
+                    )
+                )
                 # TODO: remove the weird time zone stuff from the subject
                 # print(msg["subject"])
                 # TODO: test Read the email and respond accordingly
@@ -135,7 +139,9 @@ def readEmails(quickRead=True, timeframe=None):
                                 glados_speak(str(body).strip())
                         # mail.store(i, "+FLAGS", "\\Seen")
             else:
-                glados_speak("You have too many unread emails. I'm not going to read them all, do it yourself.")
+                glados_speak(
+                    "You have too many unread emails. I'm not going to read them all, do it yourself."
+                )
                 break
 
                 # delete/skip the email
@@ -161,7 +167,11 @@ def loginGoogle() -> Credentials:
     creds = None
     if os.path.exists("token.json"):
         creds = Credentials.from_authorized_user_file(
-            "token.json", scopes=["https://www.googleapis.com/auth/calendar", 'https://www.googleapis.com/auth/gmail.modify']
+            "token.json",
+            scopes=[
+                "https://www.googleapis.com/auth/calendar",
+                "https://www.googleapis.com/auth/gmail.modify",
+            ],
         )
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
@@ -169,7 +179,11 @@ def loginGoogle() -> Credentials:
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                "google_creds.json", scopes=["https://www.googleapis.com/auth/calendar", 'https://www.googleapis.com/auth/gmail.modify']
+                "google_creds.json",
+                scopes=[
+                    "https://www.googleapis.com/auth/calendar",
+                    "https://www.googleapis.com/auth/gmail.modify",
+                ],
             )
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
