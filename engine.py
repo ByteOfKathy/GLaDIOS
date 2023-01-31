@@ -94,6 +94,7 @@ if __name__ == "__main__":
         filename = "GLaDOS-tts-" + line.replace(" ", "-")
         filename = filename.replace("!", "")
         filename = filename.replace("°c", "degrees celcius")
+        filename = filename.replace("°f", "degrees fahreinheit")
         filename = filename.replace(",", "") + ".wav"
         file = os.getcwd() + "/audio/" + filename
 

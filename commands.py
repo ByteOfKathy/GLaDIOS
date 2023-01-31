@@ -38,24 +38,12 @@ def is_dst(dt=None, timezone="UTC"):
     return timezone_aware_date.tzinfo._dst.seconds != 0
 
 
-def fetchWeather(location=None, lat=None, lon=None, address=None):
+def fetchWeather(location: str):
     """
-    Fetches the weather for your ip address.
+    Fetches the weather for a given physical address or your ip address.
     """
-    if location:
-        loc = geocoder.ip(location)
-        lat, lon = loc.latlng
-    elif address:
-        loc = geocoder.osm(address)
-        lat, lon = loc.latlng
-    else:
-        loc = geocoder.ipinfo("me")
-        lat, lon = loc.latlng
-
-    # if not lat or not lon:
-    #     raise ValueError(
-    #         "Invalid location, did you forget to add some sort of location?"
-    #     )
+    loc = geocoder.osm(location) if location else geocoder.ipinfo("me")
+    lat, lon = loc.latlng
 
     url = "https://api.openweathermap.org/data/2.5/onecall?lat={:0.2f}&lon={:0.2f}&exclude=minutely,hourly,alerts&units=imperial&appid={}".format(
         lat, lon, os.getenv("WEATHER_KEY")
@@ -71,8 +59,7 @@ def fetchWeather(location=None, lat=None, lon=None, address=None):
         minTemp = round(data["daily"][0]["temp"]["min"])
     except KeyError as e:
         raise ValueError("Invalid response from API") from e
-
-    ret = "It is currently {} degrees Fahrenheit. and feels like {} degrees Fahrenheit. The weather is. {}. The high today is {} degrees Fahrenheit. and the low is {} degrees Fahrenheit. You would know that if you went outside and actually touched grass.".format(
+    ret = "Using Fahrenheit, It is currently {} degrees and feels like {} degrees. The weather is {}. The high today is {} degrees. and the low is {} degrees. You would know that if you went outside and actually touched grass.".format(
         temp, feelslike, weather, maxTemp, minTemp
     )
     if "rain" in dailyWeather:
@@ -159,10 +146,9 @@ def readEmails(quickRead=True, timeframe=None):
     mail.logout()
 
 
-# TODO: calendar integration with google
 def loginGoogle() -> Credentials:
     """
-    Logs into your calendar.
+    Refreshes google credentials if they are expired or creates new ones if they don't exist.
     """
     creds = None
     if os.path.exists("token.json"):
@@ -195,7 +181,7 @@ def loginGoogle() -> Credentials:
 # TODO: test this
 def fetchCalendar():
     """
-    Fetches the calendar for your account.
+    Fetches the calendar for your account. Tells the next 5 events.
     """
     creds = loginGoogle()
     service = build("calendar", "v3", credentials=creds)
