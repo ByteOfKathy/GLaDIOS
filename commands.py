@@ -83,13 +83,20 @@ def fetchWeather(location=None, lat=None, lon=None, address=None):
 def readEmails(quickRead=True, timeframe=None):
     """
     Reads unread emails from your inbox based on the timeframe up to the next 10 events.
+    
+    Parameters
+    ----------
+    quickRead: bool
+        If true, will only read the subject and sender of the email.
+    timeframe: str
+        The timeframe to look for emails. Valid timeframes are day, week, month.
     """
     validTimeframes = {
         "day": timedelta(days=1),
         "week": timedelta(weeks=1),
         "month": timedelta(days=31),
     }
-    currentTime = datetime.datetime.now()
+    currentTime = datetime.now()
     if timeframe not in validTimeframes.keys():
         glados_speak(
             "You're not a good person. You know that, right? You couldn't even give a valid timeframe, so I decided to give you one."
@@ -102,26 +109,34 @@ def readEmails(quickRead=True, timeframe=None):
     mail = imaplib.IMAP4_SSL("imap.gmail.com")
     mail.login(os.getenv("EMAIL_ADD"), os.getenv("EMAIL_PASS"))
     mail.select("inbox")
-    _, data = mail.search(charset=None, criteria="UNSEEN")
+    _, data = mail.search(None, "UNSEEN")
     ids = data[0]
     id_list = ids.split()
     if len(id_list) > 0:
         glados_speak("Accessing your emails...")
+        emailNum = 0
         for i in id_list:
-            _, data = mail.fetch(i, "(RFC822)")
-            raw = data[0][1]
-            msg = email.message_from_bytes(raw)
-            glados_speak("email from {} about {}.".format(msg["from"], msg["subject"]))
-            # TODO: test Read the email and respond accordingly
-            if not quickRead:
-                glados_speak("would you like me to read it?")
-                answer = input("yes/no: ")
-                if answer == "yes":
-                    for part in msg.walk():
-                        if part.get_content_type() == "text/plain":
-                            body = part.get_payload(decode=True)
-                            glados_speak(str(body).strip())
-                    mail.store(i, "+FLAGS", "\\Seen")
+            if emailNum < 10:
+                emailNum += 1
+                _, data = mail.fetch(i, "(RFC822)")
+                raw = data[0][1]
+                msg = email.message_from_bytes(raw)
+                glados_speak("email from {} about {}.".format(msg["from"].split('@')[0], msg["subject"]))
+                # TODO: remove the weird time zone stuff from the subject
+                # print(msg["subject"])
+                # TODO: test Read the email and respond accordingly
+                if not quickRead:
+                    glados_speak("would you like me to read it?")
+                    answer = input("yes/no: ")
+                    if answer == "yes":
+                        for part in msg.walk():
+                            if part.get_content_type() == "text/plain":
+                                body = part.get_payload(decode=True)
+                                glados_speak(str(body).strip())
+                        # mail.store(i, "+FLAGS", "\\Seen")
+            else:
+                glados_speak("You have too many unread emails. I'm not going to read them all, do it yourself.")
+                break
 
                 # delete/skip the email
                 glados_speak("Would you like to delete the email?")
@@ -129,7 +144,6 @@ def readEmails(quickRead=True, timeframe=None):
                 if answer == "yes":
                     mail.store(i, "+FLAGS", "\\Deleted")
 
-            glados_speak("baking more cakes and fetching the next email")
         glados_speak(
             "Well... that looks like all the emails. Back to warming up the neurotoxin emitters ... cakes, I mean baking cakes"
         )
@@ -140,14 +154,14 @@ def readEmails(quickRead=True, timeframe=None):
 
 
 # TODO: calendar integration with google
-def loginCalendar() -> Credentials:
+def loginGoogle() -> Credentials:
     """
     Logs into your calendar.
     """
     creds = None
     if os.path.exists("token.json"):
         creds = Credentials.from_authorized_user_file(
-            "token.json", scopes=["https://www.googleapis.com/auth/calendar"]
+            "token.json", scopes=["https://www.googleapis.com/auth/calendar", 'https://www.googleapis.com/auth/gmail.modify']
         )
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
@@ -155,7 +169,7 @@ def loginCalendar() -> Credentials:
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                "google_creds.json", scopes=["https://www.googleapis.com/auth/calendar"]
+                "google_creds.json", scopes=["https://www.googleapis.com/auth/calendar", 'https://www.googleapis.com/auth/gmail.modify']
             )
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
@@ -169,9 +183,9 @@ def fetchCalendar():
     """
     Fetches the calendar for your account.
     """
-    creds = loginCalendar()
+    creds = loginGoogle()
     service = build("calendar", "v3", credentials=creds)
-    now = datetime.datetime.utcnow().isoformat() + "Z"  # 'Z' indicates UTC time
+    now = datetime.utcnow().isoformat() + "Z"  # 'Z' indicates UTC time
     events_result = (
         service.events()
         .list(
@@ -191,10 +205,13 @@ def fetchCalendar():
         if "T" in start:
             # events that are not all day
             day = start.split("T")[0].split("-")[1:]
-            time = start[-14:-6]
+            hr, mins, _ = start[-14:-6].split(":")
+            # clean up pronounciation of mins
+            if mins == "00":
+                mins = "O'clock"
             glados_speak(
-                "On {} {}, at {} you have {}".format(
-                    calendar.month_name[int(day[0])], day[1], time, event["summary"]
+                "On {} {}, at {} {} you have {}".format(
+                    calendar.month_name[int(day[0])], day[1], hr, mins, event["summary"]
                 )
             )
         else:
@@ -241,7 +258,7 @@ def addEventCalendar(summary: str, startDate: str):
     sTime = datetime.datetime.strptime(startDate, "%Y-%m-%dT%H:%M")
     # login to calendar and create event
     # TODO: daylight savings time
-    creds = loginCalendar()
+    creds = loginGoogle()
     service = build("calendar", "v3", credentials=creds)
     offset = "04:00" if is_dst() else "05:00"
     event = {
@@ -325,10 +342,12 @@ def shutdownComputer(computer):
 
 # main to test functions
 if __name__ == "__main__":
-    # fetchWeather("work")
-    fetchWeather()
+    # uncomment the function you want to test or better yet: run `pytest`
 
-    # readEmails()
+    # fetchWeather("work")
+    # fetchWeather()
+    # loginGoogle()
+    # readEmails(timeframe="day")
     # fetchCalendar()
     # addEventCalendar("test", "2022-07-11", "12:00")
     # toggleLight(types.LightState.ON)
