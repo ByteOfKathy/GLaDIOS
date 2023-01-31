@@ -28,7 +28,7 @@ You will also need to supply `Gladios` with your own environment variables.
 
 `WEATHER_KEY` - The key for [openweathermap](https://openweathermap.org/api)
 
-`EMAIL_PASS` - The key for your [gmail account](https://console.cloud.google.com/apis/credentials)
+`EMAIL_PASS` - The key for your [gmail account](https://myaccount.google.com/apppasswords)
 
 `EMAIL_ADD` - Your gmail address
 
