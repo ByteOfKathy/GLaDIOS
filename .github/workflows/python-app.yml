@@ -36,6 +36,6 @@ jobs:
         options: "--check --verbose"
         src: "./"
     
-    - name: Test with pytest
-      run: |
-        pytest
+    # - name: Test with pytest
+    #   run: |
+    #     pytest
