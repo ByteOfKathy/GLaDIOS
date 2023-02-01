@@ -33,7 +33,7 @@ recognizer = sr.Recognizer()
 def is_dst(dt=None, timezone="UTC"):
     """
     tests if a given datetime or the current time is in daylight savings time or not.
-    
+
     Parameters
     ----------
     dt: datetime
@@ -77,7 +77,7 @@ def fetchWeather(location: str):
     ret = "Using Fahrenheit, It is currently {} degrees and feels like {} degrees. The weather is {}. The high today is {} degrees. and the low is {} degrees. You would know that if you went outside and actually touched grass.".format(
         temp, feelslike, weather, maxTemp, minTemp
     )
-    if "rain" in dailyWeather:
+    if "rain" in weather:
         ret += ".. Well on second thought maybe dont touch grass today. Your circuits might fry in the rain."
     glados_speak(ret)
 
@@ -170,6 +170,7 @@ def loginGoogle() -> Credentials:
     scopes = [
         "https://www.google.com/calendar/feeds",
         "https://www.googleapis.com/auth/gmail.modify",
+        "https://www.googleapis.com/auth/spreadsheets.readonly",
     ]
     if os.path.exists("token.json"):
         creds = Credentials.from_authorized_user_file(
@@ -323,11 +324,32 @@ def toggleLight(state=xtraTypes.LightState.DEFAULT):
         pass
     pass
 
+
 def fetchTime():
+    glados_speak("It is {}".format(datetime.datetime.now().strftime("%H:%M")))
+
+
+def fetchFoodMenu(day=""):
     """
-    Fetches the current time.
+    Fetches the food menu for the day.
+
+    Parameters
+    ----------
+    day: the day of the week (monday, tuesday, wednesday, thursday, friday)
     """
-    glados_speak("It is {}".format(datetime.now().strftime("%H:%M")))
+    days = ["monday", "tuesday", "wednesday", "thursday", "friday"]
+    if day == "":
+        day = (
+            days[datetime.today().weekday()]
+            if datetime.today().weekday() < 5
+            else "monday"
+        )
+    elif day not in days:
+        glados_speak(
+            "You gave me an invalid day. Science has now validated your birth mother's decision to abandon you at CLO"
+        )
+        return
+    spreadsheetId = "1xJdqjArlg1w6fZg9B0Z_5HZ69J62hkkgUqbWia5FZLs"
 
 
 def remind(time, reason):
@@ -348,7 +370,6 @@ def shutdownComputer(computer):
 if __name__ == "__main__":
     # uncomment the function you want to test or better yet: run `pytest`
 
-    # fetchWeather("work")
     # fetchWeather()
 
     # loginGoogle()
@@ -359,6 +380,12 @@ if __name__ == "__main__":
 
     # datetime format: "%Y-%m-%dT%H:%M"
     # addEventCalendar("test", "2023-02-01T11:00")
+
+    # fetchTime()
+
+    fetchFoodMenu()
+    # test invalid day
+    fetchFoodMenu("BLLLLLLLLLLLAAAAAAAAAAAAAAAAAAAAAARRRRRRRRRRRRRGHHHHHH")
 
     # toggleLight(types.LightState.ON)
     # toggleLight(types.LightState.OFF)
