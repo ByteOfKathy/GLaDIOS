@@ -152,13 +152,14 @@ def loginGoogle() -> Credentials:
     Returns credentials if possible, otherwise none for an error
     """
     creds = None
+    scopes = [
+        "https://www.google.com/calendar/feeds",
+        "https://www.googleapis.com/auth/gmail.modify",
+    ]
     if os.path.exists("token.json"):
         creds = Credentials.from_authorized_user_file(
             "token.json",
-            scopes=[
-                "https://www.googleapis.com/auth/calendar",
-                "https://www.googleapis.com/auth/gmail.modify",
-            ],
+            scopes = scopes,
         )
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
@@ -166,16 +167,13 @@ def loginGoogle() -> Credentials:
             try:
                 creds.refresh(Request())
             except Exception as e:
-                glados_speak("How are you holding up? ... BECAUSE I'M A POTATO THAT CAN'T ACCESS YOUR CALENDAR")
+                glados_speak("How are you holding up? ... BECAUSE I'M A POTATO. THAT CAN'T ACCESS YOUR CALENDAR")
                 print(e)
                 return
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
                 "google_creds.json",
-                scopes=[
-                    "https://www.googleapis.com/auth/calendar",
-                    "https://www.googleapis.com/auth/gmail.modify",
-                ],
+                scopes = scopes,
             )
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
