@@ -149,6 +149,7 @@ def readEmails(quickRead=True, timeframe=None):
 def loginGoogle() -> Credentials:
     """
     Refreshes google credentials if they are expired or creates new ones if they don't exist.
+    Returns credentials if possible, otherwise none for an error
     """
     creds = None
     if os.path.exists("token.json"):
@@ -162,7 +163,12 @@ def loginGoogle() -> Credentials:
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
+            try:
+                creds.refresh(Request())
+            except Exception as e:
+                glados_speak("How are you holding up? ... BECAUSE I'M A POTATO THAT CAN'T ACCESS YOUR CALENDAR")
+                print(e)
+                return
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
                 "google_creds.json",
@@ -254,11 +260,13 @@ def addEventCalendar(summary: str, startDate: str):
     #     audio = recognizer.listen(mic)
     #     summary = recognizer.recognize_google(audio).lower()
     # store the start startTime and endTime in a datetime object
-    eTime = datetime.datetime.strptime(startDate) + datetime.timedelta(hours=1)
-    sTime = datetime.datetime.strptime(startDate, "%Y-%m-%dT%H:%M")
+    eTime = datetime.strptime(startDate, "%Y-%m-%dT%H:%M") + timedelta(hours=1)
+    sTime = datetime.strptime(startDate, "%Y-%m-%dT%H:%M")
     # login to calendar and create event
     # TODO: daylight savings time
     creds = loginGoogle()
+    if creds is None:
+        return
     service = build("calendar", "v3", credentials=creds)
     offset = "04:00" if is_dst() else "05:00"
     event = {
@@ -323,7 +331,7 @@ def readLedger():
 
 
 def fetchTime():
-    glados_speak("It is {}".format(datetime.datetime.now().strftime("%H:%M")))
+    glados_speak("It is {}".format(datetime.now().strftime("%H:%M")))
 
 
 def remind(time, reason):
@@ -349,7 +357,8 @@ if __name__ == "__main__":
     # loginGoogle()
     # readEmails(timeframe="day")
     # fetchCalendar()
-    # addEventCalendar("test", "2022-07-11", "12:00")
+    # "%Y-%m-%dT%H:%M"
+    addEventCalendar("test", "2023-02-01T11:00")
     # toggleLight(types.LightState.ON)
     # toggleLight(types.LightState.OFF)
     # toggleLight(types.LightState.DEFAULT)
