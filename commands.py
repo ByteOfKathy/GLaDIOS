@@ -31,6 +31,16 @@ recognizer = sr.Recognizer()
 
 
 def is_dst(dt=None, timezone="UTC"):
+    """
+    tests if a given datetime or the current time is in daylight savings time or not.
+    
+    Parameters
+    ----------
+    dt: datetime
+        The datetime to test. If none, will use the current time.
+    timezone: str
+        The timezone to test. If none, will use UTC.
+    """
     if dt is None:
         dt = datetime.utcnow()
     timezone = pytz.timezone(timezone)
@@ -41,6 +51,11 @@ def is_dst(dt=None, timezone="UTC"):
 def fetchWeather(location: str):
     """
     Fetches the weather for a given physical address or your ip address.
+
+    Parameters
+    ----------
+    location: str
+        The physical address to fetch the weather for.
     """
     loc = geocoder.osm(location) if location else geocoder.ipinfo("me")
     lat, lon = loc.latlng
@@ -159,7 +174,7 @@ def loginGoogle() -> Credentials:
     if os.path.exists("token.json"):
         creds = Credentials.from_authorized_user_file(
             "token.json",
-            scopes = scopes,
+            scopes=scopes,
         )
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
@@ -167,13 +182,15 @@ def loginGoogle() -> Credentials:
             try:
                 creds.refresh(Request())
             except Exception as e:
-                glados_speak("How are you holding up? ... BECAUSE I'M A POTATO. THAT CAN'T ACCESS YOUR CALENDAR")
+                glados_speak(
+                    "How are you holding up? ... BECAUSE I'M A POTATO. THAT CAN'T ACCESS YOUR CALENDAR"
+                )
                 print(e)
                 return
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
                 "google_creds.json",
-                scopes = scopes,
+                scopes=scopes,
             )
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
@@ -251,13 +268,14 @@ def fetchCalendar():
 def addEventCalendar(summary: str, startDate: str):
     """
     Adds an event to your calendar.
+
+    Parameters
+    ----------
+    summary : str
+        The summary of the event
+    startDate : str
+        The start date of the event in the format YYYY-MM-DDTHH:MM
     """
-    # TODO: mic input
-    # if summary is None:
-    #     recognizer.adjust_for_ambient_noise(mic, duration=0.5)
-    #     audio = recognizer.listen(mic)
-    #     summary = recognizer.recognize_google(audio).lower()
-    # store the start startTime and endTime in a datetime object
     eTime = datetime.strptime(startDate, "%Y-%m-%dT%H:%M") + timedelta(hours=1)
     sTime = datetime.strptime(startDate, "%Y-%m-%dT%H:%M")
     # login to calendar and create event
@@ -305,30 +323,10 @@ def toggleLight(state=xtraTypes.LightState.DEFAULT):
         pass
     pass
 
-
-# TODO: ledger app integration
-def addToLedger():
-    """
-    Adds an entry to your ledger.
-    """
-    pass
-
-
-def removeFromLedger():
-    """
-    Removes an entry from your ledger.
-    """
-    pass
-
-
-def readLedger():
-    """
-    reads all entries from your ledger.
-    """
-    pass
-
-
 def fetchTime():
+    """
+    Fetches the current time.
+    """
     glados_speak("It is {}".format(datetime.now().strftime("%H:%M")))
 
 
@@ -352,16 +350,19 @@ if __name__ == "__main__":
 
     # fetchWeather("work")
     # fetchWeather()
+
     # loginGoogle()
+
     # readEmails(timeframe="day")
+
     # fetchCalendar()
-    # "%Y-%m-%dT%H:%M"
-    addEventCalendar("test", "2023-02-01T11:00")
+
+    # datetime format: "%Y-%m-%dT%H:%M"
+    # addEventCalendar("test", "2023-02-01T11:00")
+
     # toggleLight(types.LightState.ON)
     # toggleLight(types.LightState.OFF)
     # toggleLight(types.LightState.DEFAULT)
-    # addToLedger()
-    # removeFromLedger()
-    # readLedger()
-    # fetchTime()
+
+    fetchTime()
     pass
