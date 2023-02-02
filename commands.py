@@ -337,6 +337,9 @@ def fetchFoodMenu(day=""):
     ----------
     day: the day of the week (monday, tuesday, wednesday, thursday, friday)
     """
+    creds = loginGoogle()
+    if not creds:
+        return
     days = ["monday", "tuesday", "wednesday", "thursday", "friday"]
     if day == "":
         day = (
@@ -350,6 +353,7 @@ def fetchFoodMenu(day=""):
         )
         return
     spreadsheetId = "1xJdqjArlg1w6fZg9B0Z_5HZ69J62hkkgUqbWia5FZLs"
+    sheetName = "menu"
 
 
 def remind(time, reason):
