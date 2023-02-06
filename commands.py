@@ -354,6 +354,24 @@ def fetchFoodMenu(day=""):
         return
     spreadsheetId = "1xJdqjArlg1w6fZg9B0Z_5HZ69J62hkkgUqbWia5FZLs"
     sheetName = "menu"
+    service = build("sheets", "v4", credentials=creds)
+    sheet = (
+        sheet.values()
+        .get(spreadsheetId=spreadsheetId, range="{}!B6:F15".format(sheetName))
+        .execute()
+    )
+    values = sheet.get("values", [])
+    if not values:
+        glados_speak("well, looks like there are no cakes nor food today")
+        return
+    # TODO: cache the menu to a file to see if we need to fetch the menu again or if it has changed over the weekend
+
+    # read the menu
+    # check if the time is before 2pm
+    if datetime.now().hour < 14:
+        # read lunch menu
+        glados_speak("Today's lunch menu is")
+        lunch = values[0]
 
 
 def remind(time, reason):
