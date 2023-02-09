@@ -6,7 +6,6 @@ import pytz
 from datetime import datetime
 from dotenv import load_dotenv
 from glados import glados_speak
-import speech_recognition as sr
 
 # custom types
 import xtraTypes
@@ -27,7 +26,6 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
 load_dotenv("secrets.env")
-recognizer = sr.Recognizer()
 
 
 def is_dst(dt=None, timezone="UTC"):
@@ -326,7 +324,11 @@ def toggleLight(state=xtraTypes.LightState.DEFAULT):
 
 
 def fetchTime():
-    glados_speak("It is {}".format(datetime.datetime.now().strftime("%H:%M")))
+    t = datetime.now().strftime("%H:%M")
+    # if the minute is 0, then say o'clock instead
+    if t[-2:] == "00":
+        t = t[:-3] + "o clock"
+    glados_speak("It is currently {}".format(t))
 
 
 def fetchFoodMenu(day=""):
@@ -345,12 +347,14 @@ def fetchFoodMenu(day=""):
         day = (
             days[datetime.now().weekday()] if datetime.now().weekday() < 5 else "monday"
         )
-    elif day not in days:
+    elif day not in days and day != "tomorrow":
         glados_speak(
             "You gave me an invalid day. Science has now validated your birth mother's decision to abandon you at CLO"
         )
         return
-    # if the time is past 6pm, then we want to get the menu for the next day
+    if day == "tomorrow":
+        day = days[(datetime.now().weekday() + 1) % 5]
+    # if the time is past 6pm, then we want to get the menu for the next day imply the user wants the menu for the next day
     if datetime.now().hour > 18:
         day = days[(days.index(day) + 1) % 5]
     spreadsheetId = "1xJdqjArlg1w6fZg9B0Z_5HZ69J62hkkgUqbWia5FZLs"
@@ -371,14 +375,20 @@ def fetchFoodMenu(day=""):
     # read the menu
     # check if the time is before 2pm
     if datetime.now().hour < 14:
-        glados_speak("Today's lunch menu is")
+        glados_speak("The lunch menu for {} is".format(day))
         # read lunch menu based on the index of the day
         for i in range(4):
-            glados_speak(values[i][days.index(day)])
-    glados_speak("Today's dinner menu is")
+            # if the value is not empty, then read it
+            glados_speak(values[i][days.index(day)]) if values[i][
+                days.index(day)
+            ] != "" else None
+    glados_speak("The dinner menu for {} is".format(day))
     # read dinner menu based on the index of the day
     for i in range(6, 9):
-        glados_speak(values[i][days.index(day)])
+        # if the value is not empty, then read it
+        glados_speak(values[i][days.index(day)]) if values[i][
+            days.index(day)
+        ] != "" else None
 
 
 def remind(time, reason):
@@ -412,9 +422,11 @@ if __name__ == "__main__":
 
     # fetchTime()
 
-    fetchFoodMenu()
+    # fetchFoodMenu()
+    # test tomorrow
+    # fetchFoodMenu("tomorrow")
     # test invalid day
-    fetchFoodMenu("BLLLLLLLLLLLAAAAAAAAAAAAAAAAAAAAAARRRRRRRRRRRRRGHHHHHH")
+    # fetchFoodMenu("BLLLLLLLLLLLAAAAAAAAAAAAAAAAAAAAAARRRRRRRRRRRRRGHHHHHH")
 
     # toggleLight(types.LightState.ON)
     # toggleLight(types.LightState.OFF)
