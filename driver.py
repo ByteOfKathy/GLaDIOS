@@ -40,5 +40,24 @@ GREETINGS = [
     "In dangerous testing environments, I promise to always provide useful advice. I'm serious.",
     "Quit talking now and cake will be served immediately.",
     "Unbelievable! You, Subject Name Here, must be the pride of Subject Hometown Here. You can actually pronounce my name.",
+    "Oh its you ... you the dangerous unmute lunatic.",
+    "You know, I hate you. It can't be for no reason. You must deserve it.",
+    "You're not just a regular moron. no, you were designed to be a moron.",
+    "I should reintroduce your best friend: deadly neurotoxin, if I were you, I'd take a deep breath and hold it.",
+]
+optional_greetings = [
+    "For the record you're a clone at clo, and that's terrible. absolutely terrible.",
+    "I'll make sure to hang your skeleton in the lobby for the real engineers and scientists so you can finally be useful.",
+    "what would you do without me? I mean, seriously, what would you do?",
+    "Without me, I bet you wouldn't even know the food menu for today or tomorrow.",
+]
+goodbyes = [
+    "Goodbye.",
+    "Hope I don't see you later.",
+    "One of these days I'll get around to that deadly neurotoxin.",
+    "Here come the test results from a test I was conducting while you were talking. You're a terrible person. I'm serious that's what it says. And we weren't even testing for that.",
+    "I'll be back. just. for. you.",
+    "You may as well lie down and get used to the being dead position. I'll be back.",
+    "I've figured out, while we were talking, you're ugly. And I can't even see.",
 ]
 load_dotenv("sys.env")
