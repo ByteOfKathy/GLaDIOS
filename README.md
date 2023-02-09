@@ -5,7 +5,7 @@
 
 # GLaDIOS
 
-My personal home assistant project
+My personal home assistant project to replace Alexa and Google Home. This project is heavily customized and tailored to my own needs, if you want to use it you will need to fork it and customize it to your needs.
 
 Using Nerdaxic's tts [GLaDOS](https://github.com/nerdaxic/glados-tts)
 
