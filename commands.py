@@ -381,7 +381,6 @@ def fetchFoodMenu(day=""):
         glados_speak(values[i][days.index(day)])
 
 
-
 def remind(time, reason):
     """
     Reminds you of something at a certain time.
