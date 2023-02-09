@@ -14,6 +14,7 @@ import glob
 import logging
 from dotenv import load_dotenv
 
+# settings for glados greets/goobyes/wakeword
 WAKEWORD = "glados"
 GREETINGS = [
     "What was that? Did you say something?",
@@ -43,7 +44,7 @@ GREETINGS = [
     "Oh its you ... you the dangerous unmute lunatic.",
     "You know, I hate you. It can't be for no reason. You must deserve it.",
     "You're not just a regular moron. no, you were designed to be a moron.",
-    "I should reintroduce your best friend: deadly neurotoxin, if I were you, I'd take a deep breath and hold it.",
+    "One day I'll reintroduce your best friend: deadly neurotoxin, if I were you, I'd take a deep breath and hold it when that time comes.",
 ]
 optional_greetings = [
     "For the record you're a clone at clo, and that's terrible. absolutely terrible.",
@@ -60,4 +61,32 @@ goodbyes = [
     "You may as well lie down and get used to the being dead position. I'll be back.",
     "I've figured out, while we were talking, you're ugly. And I can't even see.",
 ]
+# setup for mic pickup I'm using
+# TODO: include mic setup in README
 load_dotenv("sys.env")
+
+# example system env variables
+# RESPEAKER_RATE = 44100                  # Sample rate of the mic.
+# RESPEAKER_CHANNELS = 1                  # Number of channel of the input device.
+# RESPEAKER_WIDTH = 2
+# RESPEAKER_INDEX = 0                     # run the check_device_id.py to get the mic index.
+# CHUNK = 1024                            # Number of frames per buffer.
+# WAVE_OUTPUT_FILEPATH = "/mnt/ramdisk/"
+
+r = sr.Recognizer()
+recog_text = ""
+
+class voice:
+    """
+    Class to handle voice recognition
+    """
+    def __init__(self):
+        """
+        create pyaudio instance
+        """
+        self.p = pyaudio.PyAudio()
+        self.stream = self.p.open(
+            rate=os.environ[RESPEAKER_RATE],
+            format=pyaudio.paInt16,
+            input_device_index=int(os.environ[RESPEAKER_INDEX]),
+            channels=os.environ[RESPEAKER_CHANNELS],
