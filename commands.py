@@ -343,24 +343,26 @@ def fetchFoodMenu(day=""):
     days = ["monday", "tuesday", "wednesday", "thursday", "friday"]
     if day == "":
         day = (
-            days[datetime.today().weekday()]
-            if datetime.today().weekday() < 5
-            else "monday"
+            days[datetime.now().weekday()] if datetime.now().weekday() < 5 else "monday"
         )
     elif day not in days:
         glados_speak(
             "You gave me an invalid day. Science has now validated your birth mother's decision to abandon you at CLO"
         )
         return
+    # if the time is past 6pm, then we want to get the menu for the next day
+    if datetime.now().hour > 18:
+        day = days[(days.index(day) + 1) % 5]
     spreadsheetId = "1xJdqjArlg1w6fZg9B0Z_5HZ69J62hkkgUqbWia5FZLs"
     sheetName = "menu"
     service = build("sheets", "v4", credentials=creds)
-    sheet = (
+    sheet = service.spreadsheets()
+    result = (
         sheet.values()
         .get(spreadsheetId=spreadsheetId, range="{}!B6:F15".format(sheetName))
         .execute()
     )
-    values = sheet.get("values", [])
+    values = result.get("values", [])
     if not values:
         glados_speak("well, looks like there are no cakes nor food today")
         return
@@ -369,9 +371,15 @@ def fetchFoodMenu(day=""):
     # read the menu
     # check if the time is before 2pm
     if datetime.now().hour < 14:
-        # read lunch menu
         glados_speak("Today's lunch menu is")
-        lunch = values[0]
+        # read lunch menu based on the index of the day
+        for i in range(4):
+            glados_speak(values[i][days.index(day)])
+    glados_speak("Today's dinner menu is")
+    # read dinner menu based on the index of the day
+    for i in range(6, 9):
+        glados_speak(values[i][days.index(day)])
+
 
 
 def remind(time, reason):
