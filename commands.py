@@ -6,6 +6,7 @@ import pytz
 from datetime import datetime
 from dotenv import load_dotenv
 from glados import glados_speak
+from threading import Timer
 
 # custom types
 import xtraTypes
@@ -343,6 +344,7 @@ def fetchFoodMenu(day=""):
     if not creds:
         return
     days = ["monday", "tuesday", "wednesday", "thursday", "friday"]
+    invalid_dishes = ["", "main dish", "sides", "vegan"]
     if day == "":
         day = (
             days[datetime.now().weekday()] if datetime.now().weekday() < 5 else "monday"
@@ -381,28 +383,27 @@ def fetchFoodMenu(day=""):
             # if the value is not empty, then read it
             glados_speak(values[i][days.index(day)]) if values[i][
                 days.index(day)
-            ] != "" else None
+            ].lower() not in invalid_dishes else None
     glados_speak("The dinner menu for {} is".format(day))
     # read dinner menu based on the index of the day
     for i in range(6, 9):
         # if the value is not empty, then read it
         glados_speak(values[i][days.index(day)]) if values[i][
             days.index(day)
-        ] != "" else None
+        ] not in invalid_dishes else None
 
 
 def remind(time, reason):
     """
-    Reminds you of something at a certain time.
+    Reminds you of something at a certain time using a thread
+    Will speak the reason at the time.
     """
-    pass
-
-
-def shutdownComputer(computer):
-    """
-    Shuts down a computer.
-    """
-    pass
+    # start a thread that sleeps until the time is reached
+    # then speak the reason
+    # Will assume the reminder is for today
+    time = datetime.strptime(time, "%H:%M")
+    alarmThread = Timer(function=glados_speak, args=[reason], kwargs={}, interval=time)
+    alarmThread.start()
 
 
 # main to test functions
