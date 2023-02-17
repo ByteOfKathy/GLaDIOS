@@ -7,6 +7,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from glados import glados_speak
 from threading import Timer
+import sys
 
 # custom types
 import xtraTypes
@@ -29,7 +30,7 @@ from googleapiclient.discovery import build
 load_dotenv("secrets.env")
 
 
-def is_dst(dt=None, timezone="UTC"):
+def __is_dst(dt=None, timezone="UTC"):
     """
     tests if a given datetime or the current time is in daylight savings time or not.
 
@@ -282,7 +283,7 @@ def addEventCalendar(summary: str, startDate: str):
     if creds is None:
         return
     service = build("calendar", "v3", credentials=creds)
-    offset = "04:00" if is_dst() else "05:00"
+    offset = "04:00" if __is_dst() else "05:00"
     event = {
         "summary": summary,
         "start": {
@@ -354,8 +355,8 @@ def fetchFoodMenu(day=""):
         return
     if day == "tomorrow":
         day = days[(datetime.now().weekday() + 1) % 5]
-    # if the time is past 6pm, then we want to get the menu for the next day imply the user wants the menu for the next day
-    if datetime.now().hour > 18:
+    # if the time is past 6:31pm, then we want to get the menu for the next day imply the user wants the menu for the next day
+    if datetime.now().hour > 18 and datetime.now().minute >= 30:
         day = days[(days.index(day) + 1) % 5]
     spreadsheetId = "1xJdqjArlg1w6fZg9B0Z_5HZ69J62hkkgUqbWia5FZLs"
     sheetName = "menu"
@@ -378,17 +379,17 @@ def fetchFoodMenu(day=""):
         glados_speak("The lunch menu for {} is".format(day))
         # read lunch menu based on the index of the day
         for i in range(4):
-            # if the value is not empty, then read it
+            # if the value is not empty or an invalid dish, then read it
             glados_speak(values[i][days.index(day)]) if values[i][
                 days.index(day)
-            ].lower() not in invalid_dishes else None
+            ].lower() not in invalid_dishes else glados_speak("no valid item listed")
     glados_speak("The dinner menu for {} is".format(day))
     # read dinner menu based on the index of the day
     for i in range(6, 9):
-        # if the value is not empty, then read it
+        # if the value is not an invalid dish or empty, then read it
         glados_speak(values[i][days.index(day)]) if values[i][
             days.index(day)
-        ] not in invalid_dishes else None
+        ] not in invalid_dishes else glados_speak("no valid item listed")
 
 
 def remind(time, reason):
@@ -402,6 +403,17 @@ def remind(time, reason):
     time = datetime.strptime(time, "%H:%M")
     alarmThread = Timer(function=glados_speak, args=[reason], kwargs={}, interval=time)
     alarmThread.start()
+
+
+def help() -> None:
+    """
+    Lists all functions and their docstrings
+    """
+    for func in dir():
+        if func.startswith("__") or func.startswith("test"):
+            continue
+        glados_speak(func)
+        glados_speak(getattr(sys.modules[__name__], func).__doc__)
 
 
 # main to test functions

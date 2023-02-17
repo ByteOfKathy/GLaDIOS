@@ -29,7 +29,7 @@ for i in range(4):
     init_vo = vocoder(init_mel)
 
 
-def glados_speak(text: str):
+def glados_speak(text: str, output_file: str = "output.wav"):
     """
     generates audio from text and plays it
     """
@@ -47,7 +47,6 @@ def glados_speak(text: str):
     audio = audio.squeeze()
     audio = audio * 32768.0
     audio = audio.cpu().numpy().astype("int16")
-    output_file = "output.wav"
 
     # Write audio file to disk
     # 22,05 kHz sample rate
