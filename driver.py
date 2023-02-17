@@ -140,7 +140,37 @@ if __name__ == "__main__":
             if WAKEWORD in vHandler.voiceCommandProcess("process.wav").lower():
                 # select a random greeting
                 glados_speak(random.choice(GREETINGS.extend(optional_greetings)))
+                # listen for command
                 recog_text = vHandler.voiceCommandProcess("process.wav").lower()
+                # process command
+                if (
+                    "weather" in recog_text
+                    or "temperature" in recog_text
+                    or "forecast" in recog_text
+                    or "conditions" in recog_text
+                ):
+                    commands.fetchWeather()
+                elif "time" in recog_text or "date" in recog_text:
+                    commands.fetchTime()
+                elif "email" in recog_text:
+                    commands.readEmails()
+                elif (
+                    "in my calendar" in recog_text or "calendar look like" in recog_text
+                ):
+                    commands.fetchCalendar()
+                elif (
+                    "food" in recog_text
+                    or "lunch" in recog_text
+                    or "dinner" in recog_text
+                    or "menu" in recog_text
+                ):
+                    if "tomorrow" in recog_text:
+                        commands.fetchFoodMenu(day = "tomorrow")
+                    # check if a weekday was mentioned
+                    elif []:
+                        commands.fetchFoodMenu(day = [day for day in WEEKDAYS if day in recog_text][0])] :
+
+                    commands.fetchFoodMenu()
         # if glados is muted and we hear the wake word and unmute command
         if vHandler.isMuted and WAKEWORD in recog_text and "unmute" in recog_text:
             recog_text = vHandler.voiceCommandProcess("process.wav").lower()

@@ -199,7 +199,6 @@ def loginGoogle() -> Credentials:
     return creds
 
 
-# TODO: test this
 def fetchCalendar():
     """
     Fetches the calendar for your account. Tells the next 5 events.
@@ -264,7 +263,6 @@ def fetchCalendar():
     )
 
 
-# TODO: test this
 def addEventCalendar(summary: str, startDate: str):
     """
     Adds an event to your calendar.
