@@ -34,12 +34,10 @@ for i in range(4):
 
 
 def glados_tts(text, key=False):
-
     # Tokenize, clean and phonemize input text
     x = prepare_text(text).to("cpu")
 
     with torch.no_grad():
-
         # Generate generic TTS-output
         old_time = time.time()
         tts_output = glados.generate_jit(x)
@@ -71,7 +69,6 @@ def glados_tts(text, key=False):
 
 # If the script is run directly, assume remote engine
 if __name__ == "__main__":
-
     # Remote Engine Veritables
     PORT = 8124
     CACHE = True
@@ -100,7 +97,6 @@ if __name__ == "__main__":
 
         # Check for Local Cache
         if os.path.isfile(file):
-
             # Update access time. This will allow for routine cleanups
             os.utime(file, None)
             print("\033[1;94mINFO:\033[;97m The audio sample sent from cache.")

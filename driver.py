@@ -131,6 +131,7 @@ if __name__ == "__main__":
                     ] in recog_text:
                         # auto assume the last word is the day
                         commands.fetchFoodMenu(day=recog_text.strip(" ")[-1])
+                        # just fetch the menu for the next meal(s)
                     else:
                         commands.fetchFoodMenu()
                 elif "help" in recog_text:

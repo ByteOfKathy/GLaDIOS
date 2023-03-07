@@ -5,6 +5,7 @@ import pytest
 # This file is used to test the commands.py file locally
 # TODO: add secrets to github actions
 
+
 # deprecating until fetchWeather gets static location integration from me
 @pytest.mark.skip
 def test_fetchWeatherLocations():

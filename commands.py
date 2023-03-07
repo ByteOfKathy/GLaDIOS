@@ -1,7 +1,7 @@
 import datetime
 import os
 import random
-from datetime import time, timedelta
+from datetime import timedelta
 import pytz
 from datetime import datetime
 from dotenv import load_dotenv
@@ -392,16 +392,26 @@ def fetchFoodMenu(day=""):
         ] not in invalid_dishes else glados_speak("no valid item listed")
 
 
-def remind(time, reason):
+def remind(time, reason, debug=False):
     """
     Reminds you of something at a certain time using a thread
     Will speak the reason at the time.
+
+    Parameters
+    ----------
+    time: the time to remind you of something as HH:MM
+    reason: the reason to remind you of something (will be spoken)
     """
     # start a thread that sleeps until the time is reached
     # then speak the reason
-    # Will assume the reminder is for today
-    time = datetime.strptime(time, "%H:%M")
-    alarmThread = Timer(function=glados_speak, args=[reason], kwargs={}, interval=time)
+    # Will assume the reminder is going to be in hrs and mins only (short term)
+    time = int(time.strip().split(":")[0]) * 3600 + int(time.strip().split(":")[1]) * 60
+    alarmThread = Timer(
+        function=glados_speak,
+        args=[reason, "output.wav", True],
+        kwargs={},
+        interval=time,
+    )
     alarmThread.start()
 
 
@@ -410,14 +420,15 @@ def help() -> None:
     Lists all functions and their docstrings
     """
     for func in dir():
-        if func.startswith("__") or func.startswith("test"):
-            continue
-        glados_speak(func)
-        glados_speak(getattr(sys.modules[__name__], func).__doc__)
+        if not func.startswith("__") or func.startswith("test"):
+            glados_speak(func)
+            glados_speak(getattr(sys.modules[__name__], func).__doc__)
 
 
 # main to test functions
 if __name__ == "__main__":
+    from time import sleep
+
     # uncomment the function you want to test or better yet: run `pytest`
 
     # fetchWeather()
@@ -443,5 +454,11 @@ if __name__ == "__main__":
     # toggleLight(types.LightState.OFF)
     # toggleLight(types.LightState.DEFAULT)
 
-    fetchTime()
-    pass
+    # fetchTime()
+
+    # print("starting test timer")
+    # remind("00:01", "test", debug=True)
+    # for i in range(60):
+    #     print(i)
+    #     sleep(1)
+    # print("test timer should be finished")

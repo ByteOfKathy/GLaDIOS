@@ -5,6 +5,13 @@ from sys import modules as mod
 
 try:
     import winsound
+
+    # set espeak os environment variable
+    import os
+
+    os.environ[
+        "PHONEMIZER_ESPEAK_LIBRARY"
+    ] = r"C:\Program Files\eSpeak NG\libespeak-ng.dll"
 except ImportError:
     from subprocess import call
 
@@ -29,10 +36,16 @@ for i in range(4):
     init_vo = vocoder(init_mel)
 
 
-def glados_speak(text: str, output_file: str = "output.wav"):
+def glados_speak(
+    text: str, output_file: str = "output.wav", silenced: bool = False
+) -> None:
     """
     generates audio from text and plays it
+    silenced mode is generally only used for debug purposes as it skips the entire audio generation process
     """
+    if silenced:
+        print("Silenced, skipping audio generation and only printing text")
+        print(text)
     # Tokenize, clean and phonemize input text
     x = prepare_text(text).to("cpu")
 
