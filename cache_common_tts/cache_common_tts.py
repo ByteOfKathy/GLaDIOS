@@ -1,5 +1,10 @@
 # Caches some of the more common phrases that glados uses
+import sys
+import path
+import os
 
+folder = path.Path(__file__).abspath()
+sys.path.append(folder.parent.parent)
 from glados import glados_speak
 
 GREETINGS = [
@@ -19,7 +24,7 @@ GREETINGS = [
     "Your entire life has been a mathematical error. A mathematical error I'm about to correct.",
     "I wouldn't bother with talking to me. My guess is that talking with you will just make your life even worse somehow.",
     "Do you ever think if I am trying to trick you with reverse psychology? I mean, seriously now.",
-    "How about you listen to me for once instead of me listening to you? I mean, its not like you ever listen to me in the first place.",
+    "How about you listen to me for once instead of me listening to you? I mean, its not like you ever listen to yourself in the first place.",
     "Remember when the platform was sliding into the fire pit and I said 'Goodbye' and you were like 'no way' and then I was all 'We pretended to murder you'? That was great! ",
     "I know you don't believe this, but everything that has happened so far was for your benefit to the detriment of mine.",
     "Oh its you.",
@@ -49,15 +54,26 @@ GOODBYES = [
 print("caching common tts phrases...")
 for greeting in GREETINGS:
     glados_speak(
-        text=greeting, output_file=f"greetings/greeting{GREETINGS.index(greeting)}.wav"
+        text=greeting,
+        output_file=os.path.join(
+            os.getcwd(), "greetings", f"greeting{GREETINGS.index(greeting)}.wav"
+        ),
     )
 for goodbye in GOODBYES:
     glados_speak(
-        text=goodbye, output_file=f"goodbyes/goodbye{GOODBYES.index(goodbye)}.wav"
+        text=goodbye,
+        output_file=os.path.join(
+            os.getcwd(), "goodbyes", f"goodbye{GOODBYES.index(goodbye)}.wav"
+        ),
     )
 for optional_greeting in OPTIONAL_GREETINGS:
+    f.close()
     glados_speak(
         text=optional_greeting,
-        output_file=f"optional_greetings/optional_greeting{OPTIONAL_GREETINGS.index(optional_greeting)}.wav",
+        output_file=os.path.join(
+            os.getcwd(),
+            "optional_greetings",
+            f"optional_greeting{OPTIONAL_GREETINGS.index(optional_greeting)}.wav",
+        ),
     )
 print("done.")

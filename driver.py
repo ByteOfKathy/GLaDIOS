@@ -53,21 +53,17 @@ class voiceProcessor(object):
         )
         self.isMuted = isMuted
 
-    def voiceCommandProcess(self, file: str, wait_time=3) -> str:
+    def voiceCommandProcess(self, file: str) -> str:
         # delete the file if it exists
         if os.path.exists(file):
             os.remove(file)
         # record audio to a new file
         with sr.AudioFile(file) as source:
-            r.adjust_for_ambient_noise(source=source, duration=0.5)
-            while wait_time > 0:
-                audio = r.record(source, duration=3)
-                # if we have the audio, we can break out of the loop
-                if audio:
-                    break
-                # otherwise, we decrement the wait time
-                wait_time -= 1
-                time.sleep(1)
+            # TODO: replace with led light signals
+            glados_speak("Adjusting for background noise", silenced=self.isMuted)
+            r.adjust_for_ambient_noise(source=source, duration=1)
+            glados_speak("Speak now", silenced=self.isMuted)
+            audio = r.record(source)
             # if we have audio, we can process it
             if audio:
                 try:

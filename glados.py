@@ -2,13 +2,13 @@ import torch
 from utils.tools import prepare_text
 from scipy.io.wavfile import write
 from sys import modules as mod
+import os
+
 
 try:
     import winsound
 
     # set espeak os environment variable
-    import os
-
     os.environ[
         "PHONEMIZER_ESPEAK_LIBRARY"
     ] = r"C:\Program Files\eSpeak NG\libespeak-ng.dll"
@@ -26,8 +26,10 @@ else:
     device = "cpu"
 
 # Load models
-glados = torch.jit.load("models/glados.pt")
-vocoder = torch.jit.load("models/vocoder-gpu.pt", map_location=device)
+glados_path = os.path.join(os.path.dirname(__file__), "models", "glados.pt")
+glados = torch.jit.load(glados_path, map_location=device)
+vocoder_path = os.path.join(os.path.dirname(__file__), "models", "vocoder-gpu.pt")
+vocoder = torch.jit.load(vocoder_path, map_location=device)
 
 # Prepare models in RAM
 for i in range(4):
@@ -73,7 +75,7 @@ def glados_speak(
         # call(["afplay", "./output.wav"])
         # Linux
         try:
-            call(["aplay", "./output.wav"])
+            call(["aplay", output_file])
         except:
             # Play audio file
             from audioplayer import AudioPlayer

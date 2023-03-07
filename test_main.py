@@ -52,6 +52,7 @@ def test_readEmails():
         assert False, e.args[0]
     assert True
 
+
 @pytest.mark.skip
 def test_fetchCalender():
     try:
@@ -94,7 +95,7 @@ def test_help():
         old_stdout = sys.stdout
         sys.stdout = buffer = io.StringIO()
         output = buffer.getvalue()
-        sys.stdout = old_stdout 
+        sys.stdout = old_stdout
         assert output is not None or output != ""
     except Exception as e:
         assert False, e.args[0]
