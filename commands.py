@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from glados import glados_speak
 from threading import Timer
 import sys
+from inspect import getdoc, getmembers, isfunction
 
 # custom types
 import xtraTypes
@@ -48,7 +49,7 @@ def __is_dst(dt=None, timezone="UTC"):
     return timezone_aware_date.tzinfo._dst.seconds != 0
 
 
-def fetchWeather(location: str):
+def fetchWeather(location: str = None):
     """
     Fetches the weather for a given physical address or your ip address.
 
@@ -85,6 +86,7 @@ def fetchWeather(location: str):
 def readEmails(quickRead=True, timeframe=None):
     """
     Reads unread emails from your inbox based on the timeframe up to the next 10 events.
+    Can perform a quick read, skipping over the body of the email. Can also specify a timeframe to look for emails.
 
     Parameters
     ----------
@@ -161,7 +163,7 @@ def readEmails(quickRead=True, timeframe=None):
     mail.logout()
 
 
-def loginGoogle() -> Credentials:
+def __loginGoogle() -> Credentials:
     """
     Refreshes google credentials if they are expired or creates new ones if they don't exist.
     Returns credentials if possible, otherwise none for an error
@@ -204,7 +206,7 @@ def fetchCalendar():
     """
     Fetches the calendar for your account. Tells the next 5 events.
     """
-    creds = loginGoogle()
+    creds = __loginGoogle()
     service = build("calendar", "v3", credentials=creds)
     now = datetime.utcnow().isoformat() + "Z"  # 'Z' indicates UTC time
     events_result = (
@@ -266,7 +268,7 @@ def fetchCalendar():
 
 def addEventCalendar(summary: str, startDate: str):
     """
-    Adds an event to your calendar.
+    Adds an event to your calendar given a summary and date.
 
     Parameters
     ----------
@@ -279,7 +281,7 @@ def addEventCalendar(summary: str, startDate: str):
     sTime = datetime.strptime(startDate, "%Y-%m-%dT%H:%M")
     # login to calendar and create event
     # TODO: daylight savings time
-    creds = loginGoogle()
+    creds = __loginGoogle()
     if creds is None:
         return
     service = build("calendar", "v3", credentials=creds)
@@ -324,6 +326,9 @@ def toggleLight(state=xtraTypes.LightState.DEFAULT):
 
 
 def fetchTime():
+    """
+    Speaks the current time.
+    """
     t = datetime.now().strftime("%H:%M")
     # if the minute is 0, then say o'clock instead
     if t[-2:] == "00":
@@ -333,13 +338,13 @@ def fetchTime():
 
 def fetchFoodMenu(day=""):
     """
-    Fetches the food menu for the day.
+    Fetches the food menu for a day.
 
     Parameters
     ----------
     day: the day of the week (monday, tuesday, wednesday, thursday, friday)
     """
-    creds = loginGoogle()
+    creds = __loginGoogle()
     if not creds:
         return
     days = ["monday", "tuesday", "wednesday", "thursday", "friday"]
@@ -392,15 +397,14 @@ def fetchFoodMenu(day=""):
         ] not in invalid_dishes else glados_speak("no valid item listed")
 
 
-def remind(time, reason, debug=False):
+def remind(time: str, reason: str, debug=False) -> None:
     """
-    Reminds you of something at a certain time using a thread
-    Will speak the reason at the time.
+    Sets a reminder for a specific time given a reason.
 
     Parameters
     ----------
     time: the time to remind you of something as HH:MM
-    reason: the reason to remind you of something (will be spoken)
+    reason: the reason to remind you of something (will be spoken unless debug is True)
     """
     # start a thread that sleeps until the time is reached
     # then speak the reason
@@ -415,14 +419,19 @@ def remind(time, reason, debug=False):
     alarmThread.start()
 
 
-def help() -> None:
+def help(debug=False) -> None:
     """
-    Lists all functions and their docstrings
+    Lists all functions and their docs in a human readable format.
     """
-    for func in dir():
-        if not func.startswith("__") or func.startswith("test"):
-            glados_speak(func)
-            glados_speak(getattr(sys.modules[__name__], func).__doc__)
+    for func in getmembers(sys.modules[__name__], isfunction):
+        if (
+            not func[0].startswith("__")
+            and not func[1].__doc__ is None
+            and "object" not in func[1].__doc__.lower()
+            and ".env" not in func[1].__doc__.lower()
+        ):
+            print(func[0])
+            print(func[1].__doc__.split("Parameters")[0])
 
 
 # main to test functions
@@ -433,7 +442,7 @@ if __name__ == "__main__":
 
     # fetchWeather()
 
-    # loginGoogle()
+    # __loginGoogle()
 
     # readEmails(timeframe="day")
 
@@ -462,3 +471,5 @@ if __name__ == "__main__":
     #     print(i)
     #     sleep(1)
     # print("test timer should be finished")
+
+    # help(debug=True)

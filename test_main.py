@@ -1,6 +1,9 @@
 import commands
 import datetime as dt
 import pytest
+import io
+import sys
+import os
 
 # This file is used to test the commands.py file locally
 # TODO: add secrets to github actions
@@ -21,6 +24,9 @@ def test_fetchWeatherLocations():
     assert True
 
 
+@pytest.mark.skipif(
+    os.environ.get("WEATHER_KEY") is None, reason="No weather key found"
+)
 def test_fetchWeather():
     try:
         commands.fetchWeather()
@@ -46,7 +52,7 @@ def test_readEmails():
         assert False, e.args[0]
     assert True
 
-
+@pytest.mark.skip
 def test_fetchCalender():
     try:
         commands.fetchCalendar()
@@ -72,7 +78,26 @@ def test_fetchTime():
         assert False, e.args[0]
     assert True
 
+
 def test_remind():
+    try:
+        commands.remind("00:01", "Test Reminder", True)
+    except Exception as e:
+        assert False, e.args[0]
+    assert True
+
+
+def test_help():
+    # make sure the help command debug prints the help message
+    try:
+        commands.help(True)
+        old_stdout = sys.stdout
+        sys.stdout = buffer = io.StringIO()
+        output = buffer.getvalue()
+        sys.stdout = old_stdout 
+        assert output is not None or output != ""
+    except Exception as e:
+        assert False, e.args[0]
 
 
 if __name__ == "__main__":

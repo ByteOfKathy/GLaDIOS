@@ -46,6 +46,7 @@ def glados_speak(
     if silenced:
         print("Silenced, skipping audio generation and only printing text")
         print(text)
+        return
     # Tokenize, clean and phonemize input text
     x = prepare_text(text).to("cpu")
 
