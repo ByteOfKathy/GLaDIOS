@@ -11,6 +11,9 @@ Using Nerdaxic's tts [GLaDOS](https://github.com/nerdaxic/glados-tts)
 
 ## Requirements and Setup
 
+### Google integration
+You can skip this section if you do not want to use the google integration. (Reading emails, calendar events, and reading spreadsheet data)
+
 You will need to have a `google_creds.json` file and supply your own credentials from [google](https://console.cloud.google.com/apis/credentials) in the main directory. It should be in the format:
 
 ```json
@@ -26,23 +29,28 @@ You will need to have a `google_creds.json` file and supply your own credentials
     }
 }
 ```
+### Setting up your environment variables
 
 You will also need to supply `Gladios` with your own environment variables.
 
+#### Open weather map
+
 `WEATHER_KEY` - The key for [openweathermap](https://openweathermap.org/api)
 
-`EMAIL_PASS` - The key for your [gmail account](https://myaccount.google.com/apppasswords)
+#### Google
+
+`EMAIL_PASS` - The key for your [gmail account] (https://myaccount.google.com/apppasswords)
 
 `EMAIL_ADD` - Your gmail address
 
 ## Running
 
-| :warning: **Warning**: Only tested on Linux systems and WSL |
-| --- |
+| :warning: **Warning**: Only tested on Linux systems, WSL, and Windows |
+| --------------------------------------------------------------------- |
 
 1. Create your venv
 
-`python3 -m venv ./venv/`
+ex: `python3 -m venv ./venv/`
 
 2. Install the requirements
 
@@ -58,4 +66,17 @@ You will also need to supply `Gladios` with your own environment variables.
 `python3 commands.py`
 
 | :warning: **Warning**: This step is subject to change very soon |
-| --- |
+| --------------------------------------------------------------- |
+
+## Common issues
+
+### espeak not found in windows
+Sometimes Windows will not be able to find espeak, to fix this you will need to set the environment variable `PHONEMIZER_ESPEAK_LIBRARY` to the path of the espeak library. This can be done in the `commands.py` file by editing the following line:
+```python
+os.environ[
+        "PHONEMIZER_ESPEAK_LIBRARY"
+    ] = "Path/to/espeak.dll"
+```
+
+### WSL is slow
+There is nothing I can do about this, it looks to be a WSL issue maybe with the drivers not being integrated very well. Any ideas/PRs would be welcome.

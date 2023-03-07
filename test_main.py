@@ -6,7 +6,7 @@ import pytest
 # TODO: add secrets to github actions
 
 
-# deprecating until fetchWeather gets static location integration from me
+# deprecating until fetchWeather gets static location integration from me and I can log the secrets
 @pytest.mark.skip
 def test_fetchWeatherLocations():
     try:
@@ -65,12 +65,14 @@ def test_addEventCalendar():
     assert True
 
 
-def fetchTime():
+def test_fetchTime():
     try:
         commands.fetchTime()
     except Exception as e:
         assert False, e.args[0]
     assert True
+
+def test_remind():
 
 
 if __name__ == "__main__":
