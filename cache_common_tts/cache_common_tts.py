@@ -52,6 +52,39 @@ GOODBYES = [
     "You may as well lie down and get used to the being dead position. I'll be back with your friend: deadly neurotoxin.",
 ]
 print("caching common tts phrases...")
+# check arguments
+if len(sys.argv) > 1:
+    startGroup = sys.argv[1]
+    startNum = sys.argv[2] if len(sys.argv) > 2 else 0
+    if startGroup == "greetings":
+        GREETINGS = GREETINGS[int(startNum) :]
+    elif startGroup == "goodbyes":
+        GOODBYES = GOODBYES[int(startNum) :]
+    elif startGroup == "optional_greetings":
+        OPTIONAL_GREETINGS = OPTIONAL_GREETINGS[int(startNum) :]
+    elif startGroup == "continue":
+        # check which greetings have already been cached and the folder exists
+        cached_greetings = (
+            len(os.listdir(os.path.join(os.getcwd(), "greetings")))
+            if os.path.isdir("greetings")
+            else 0
+        )
+        cached_goodbyes = (
+            len(os.listdir(os.path.join(os.getcwd(), "goodbyes")))
+            if os.path.isdir("goodbyes")
+            else 0
+        )
+        cached_optional_greetings = (
+            len(os.listdir(os.path.join(os.getcwd(), "optional_greetings")))
+            if os.path.isdir("optional_greetings")
+            else 0
+        )
+        GREETINGS = GREETINGS[cached_greetings:]
+        GOODBYES = GOODBYES[cached_goodbyes:]
+        OPTIONAL_GREETINGS = OPTIONAL_GREETINGS[cached_optional_greetings:]
+    else:
+        print("start group must be 'greetings', 'goodbyes', or 'optional_greetings'")
+        exit()
 for greeting in GREETINGS:
     glados_speak(
         text=greeting,
@@ -67,7 +100,6 @@ for goodbye in GOODBYES:
         ),
     )
 for optional_greeting in OPTIONAL_GREETINGS:
-    f.close()
     glados_speak(
         text=optional_greeting,
         output_file=os.path.join(
