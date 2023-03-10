@@ -41,7 +41,39 @@ You will also need to supply `Gladios` with your own environment variables.
 
 `EMAIL_PASS` - The key for your [gmail account] (https://myaccount.google.com/apppasswords)
 
-`EMAIL_ADD` - Your gmail address
+`EMAIL_ADD` - Your gmail addre
+
+## File explanations
+
+### primary files
+
+`commands.py` - The file with all the Gladios commands
+
+`driver.py` - The file that drives the commands and wil be implemented on the raspberry pi
+
+`engine.py` - the file that handles the tts on a hosted tts server
+
+### folderws
+
+`cache_common_tts` - the folder than contains cached common phrases that Gladios uses (mostly greetings and goodbyes)
+
+### test files
+
+`test_main.py` - The primary testing file for commands.py
+
+### other
+
+`requirments.txt` - The file that contains all the requirements for the project
+
+`TTS-README.md` - Nerdaxic's readme for the tts
+
+`models` - Nerdaxic's models for the tts
+
+`.github` - workflow files for github actions
+
+`utils` - Nerdaxic's utils for the tts
+
+`xtraTypes.py` - TBD
 
 ## Running
 
