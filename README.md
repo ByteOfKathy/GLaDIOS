@@ -53,7 +53,7 @@ You will also need to supply `Gladios` with your own environment variables.
 
 `engine.py` - the file that handles the tts on a hosted tts server
 
-### folderws
+### folders
 
 `cache_common_tts` - the folder than contains cached common phrases that Gladios uses (mostly greetings and goodbyes)
 
