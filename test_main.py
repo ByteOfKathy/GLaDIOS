@@ -102,4 +102,4 @@ def test_help():
 
 
 if __name__ == "__main__":
-    pass
+    print("please run pytest instead of this file")
