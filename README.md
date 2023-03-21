@@ -111,4 +111,4 @@ os.environ[
 ```
 
 ### WSL is slow
-There is nothing I can do about this, it looks to be a WSL issue maybe with the drivers not being integrated very well. Any ideas/PRs would be welcome.
+There is nothing I can do about this, it looks to be a limitation of WSL. I have found that using the windows terminal with WSL is faster than using the default WSL terminal.
