@@ -8,3 +8,5 @@ google_creds*
 token.json
 *-test.py
 .vscode/
+*.sh
+bash_scripts/

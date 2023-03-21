@@ -2,9 +2,18 @@ import torch
 from utils.tools import prepare_text
 from scipy.io.wavfile import write
 from sys import modules as mod
+import os
+from playsound import playsound
+from time import sleep
+
 
 try:
     import winsound
+
+    # set espeak os environment variable
+    os.environ[
+        "PHONEMIZER_ESPEAK_LIBRARY"
+    ] = r"C:\Program Files\eSpeak NG\libespeak-ng.dll"
 except ImportError:
     from subprocess import call
 
@@ -19,8 +28,10 @@ else:
     device = "cpu"
 
 # Load models
-glados = torch.jit.load("models/glados.pt")
-vocoder = torch.jit.load("models/vocoder-gpu.pt", map_location=device)
+glados_path = os.path.join(os.path.dirname(__file__), "models", "glados.pt")
+glados = torch.jit.load(glados_path, map_location=device)
+vocoder_path = os.path.join(os.path.dirname(__file__), "models", "vocoder-gpu.pt")
+vocoder = torch.jit.load(vocoder_path, map_location=device)
 
 # Prepare models in RAM
 for i in range(4):
@@ -29,10 +40,17 @@ for i in range(4):
     init_vo = vocoder(init_mel)
 
 
-def glados_speak(text: str):
+def glados_speak(
+    text: str, output_file: str = "output.wav", silenced: bool = False
+) -> None:
     """
     generates audio from text and plays it
+    silenced mode is generally only used for debug purposes as it skips the entire audio generation process
     """
+    if silenced:
+        print("Silenced, skipping audio generation and only printing text")
+        print(text)
+        return
     # Tokenize, clean and phonemize input text
     x = prepare_text(text).to("cpu")
 
@@ -47,25 +65,15 @@ def glados_speak(text: str):
     audio = audio.squeeze()
     audio = audio * 32768.0
     audio = audio.cpu().numpy().astype("int16")
-    output_file = "output.wav"
 
     # Write audio file to disk
     # 22,05 kHz sample rate
     write(output_file, 22050, audio)
 
-    if "winsound" in mod:
-        winsound.PlaySound(output_file, winsound.SND_FILENAME)
-    else:
-        # macOS
-        # call(["afplay", "./output.wav"])
-        # Linux
-        try:
-            call(["aplay", "./output.wav"])
-        except:
-            # Play audio file
-            from audioplayer import AudioPlayer
-
-            AudioPlayer(output_file).play(block=True)
+    try:
+        call(["aplay", output_file])
+    except:
+        playsound(output_file, block=False)
 
 
 """

@@ -1,11 +1,16 @@
 import datetime
 import os
 import random
-from datetime import time, timedelta
+from datetime import timedelta
+import time
+from typing import Mapping
 import pytz
 from datetime import datetime
 from dotenv import load_dotenv
 from glados import glados_speak
+from threading import Timer
+import sys
+from inspect import getdoc, getmembers, isfunction
 
 # custom types
 import xtraTypes
@@ -28,7 +33,7 @@ from googleapiclient.discovery import build
 load_dotenv("secrets.env")
 
 
-def is_dst(dt=None, timezone="UTC"):
+def __is_dst(dt=None, timezone="UTC"):
     """
     tests if a given datetime or the current time is in daylight savings time or not.
 
@@ -46,7 +51,7 @@ def is_dst(dt=None, timezone="UTC"):
     return timezone_aware_date.tzinfo._dst.seconds != 0
 
 
-def fetchWeather(location: str):
+def fetchWeather(location: str = None):
     """
     Fetches the weather for a given physical address or your ip address.
 
@@ -83,6 +88,7 @@ def fetchWeather(location: str):
 def readEmails(quickRead=True, timeframe=None):
     """
     Reads unread emails from your inbox based on the timeframe up to the next 10 events.
+    Can perform a quick read, skipping over the body of the email. Can also specify a timeframe to look for emails.
 
     Parameters
     ----------
@@ -159,7 +165,7 @@ def readEmails(quickRead=True, timeframe=None):
     mail.logout()
 
 
-def loginGoogle() -> Credentials:
+def __loginGoogle() -> Credentials:
     """
     Refreshes google credentials if they are expired or creates new ones if they don't exist.
     Returns credentials if possible, otherwise none for an error
@@ -198,12 +204,11 @@ def loginGoogle() -> Credentials:
     return creds
 
 
-# TODO: test this
 def fetchCalendar():
     """
     Fetches the calendar for your account. Tells the next 5 events.
     """
-    creds = loginGoogle()
+    creds = __loginGoogle()
     service = build("calendar", "v3", credentials=creds)
     now = datetime.utcnow().isoformat() + "Z"  # 'Z' indicates UTC time
     events_result = (
@@ -263,10 +268,9 @@ def fetchCalendar():
     )
 
 
-# TODO: test this
 def addEventCalendar(summary: str, startDate: str):
     """
-    Adds an event to your calendar.
+    Adds an event to your calendar given a summary and date.
 
     Parameters
     ----------
@@ -279,11 +283,11 @@ def addEventCalendar(summary: str, startDate: str):
     sTime = datetime.strptime(startDate, "%Y-%m-%dT%H:%M")
     # login to calendar and create event
     # TODO: daylight savings time
-    creds = loginGoogle()
+    creds = __loginGoogle()
     if creds is None:
         return
     service = build("calendar", "v3", credentials=creds)
-    offset = "04:00" if is_dst() else "05:00"
+    offset = "04:00" if __is_dst() else "05:00"
     event = {
         "summary": summary,
         "start": {
@@ -323,7 +327,10 @@ def toggleLight(state=xtraTypes.LightState.DEFAULT):
     pass
 
 
-def fetchTime():
+def fetchTime() -> None:
+    """
+    Speaks the current time.
+    """
     t = datetime.now().strftime("%H:%M")
     # if the minute is 0, then say o'clock instead
     if t[-2:] == "00":
@@ -331,18 +338,19 @@ def fetchTime():
     glados_speak("It is currently {}".format(t))
 
 
-def fetchFoodMenu(day=""):
+def fetchFoodMenu(day="") -> None:
     """
-    Fetches the food menu for the day.
+    Fetches the food menu for a day.
 
     Parameters
     ----------
     day: the day of the week (monday, tuesday, wednesday, thursday, friday)
     """
-    creds = loginGoogle()
+    creds = __loginGoogle()
     if not creds:
         return
     days = ["monday", "tuesday", "wednesday", "thursday", "friday"]
+    invalid_dishes = ["", "main dish", "sides", "vegan"]
     if day == "":
         day = (
             days[datetime.now().weekday()] if datetime.now().weekday() < 5 else "monday"
@@ -354,8 +362,8 @@ def fetchFoodMenu(day=""):
         return
     if day == "tomorrow":
         day = days[(datetime.now().weekday() + 1) % 5]
-    # if the time is past 6pm, then we want to get the menu for the next day imply the user wants the menu for the next day
-    if datetime.now().hour > 18:
+    # if the time is past 6:31pm, then we want to get the menu for the next day imply the user wants the menu for the next day
+    if datetime.now().hour > 18 and datetime.now().minute >= 30:
         day = days[(days.index(day) + 1) % 5]
     spreadsheetId = "1xJdqjArlg1w6fZg9B0Z_5HZ69J62hkkgUqbWia5FZLs"
     sheetName = "menu"
@@ -378,40 +386,81 @@ def fetchFoodMenu(day=""):
         glados_speak("The lunch menu for {} is".format(day))
         # read lunch menu based on the index of the day
         for i in range(4):
-            # if the value is not empty, then read it
+            # if the value is not empty or an invalid dish, then read it
             glados_speak(values[i][days.index(day)]) if values[i][
                 days.index(day)
-            ] != "" else None
+            ].lower() not in invalid_dishes else glados_speak("no valid item listed")
     glados_speak("The dinner menu for {} is".format(day))
     # read dinner menu based on the index of the day
     for i in range(6, 9):
-        # if the value is not empty, then read it
+        # if the value is not an invalid dish or empty, then read it
         glados_speak(values[i][days.index(day)]) if values[i][
             days.index(day)
-        ] != "" else None
+        ] not in invalid_dishes else glados_speak("no valid item listed")
 
 
-def remind(time, reason):
+def remind(
+    time: str = "00:01:00",
+    args: Mapping[str, any] | None = None,
+    function=glados_speak,
+) -> Timer | None:
     """
-    Reminds you of something at a certain time.
+    Sets a reminder for a specific time given a reason. Will run the passed function with the
+    passed arguments asynchonously after time.
+
+    Parameters
+    ----------
+    time: the time to remind you of something as HH:MM
+    args: the arguments to pass to the function
+    function: the function to call when the time is reached
+
+    Returns
+    -------
+    Timer: the timer object that is running the reminder or None if the time is invalid
     """
-    pass
+    # start a thread that sleeps until the time is reached
+    # then run the function passed
+    # Will assume the reminder is going to be in hrs and mins only (short term)
+    t = time.strip().split(":")
+    if len(t) != 3:
+        glados_speak("Invalid time format. Please use HH:MM:SS")
+        return None
+    time = int(t[0]) * 3600 + int(t[1]) * 60 + int(t[2])
+    alarmThread = Timer(
+        function=function,
+        args=args,
+        kwargs={},
+        interval=time,
+    )
+    alarmThread.start()
+    return alarmThread
 
 
-def shutdownComputer(computer):
+def help(debug=False) -> None:
     """
-    Shuts down a computer.
+    Lists all functions and their docs in a human readable format.
     """
-    pass
+    for func in getmembers(sys.modules[__name__], isfunction):
+        # smart filtering so that only my functions are printed
+        if (
+            not func[0].startswith("__")
+            and not func[1].__doc__ is None
+            and "object" not in func[1].__doc__.lower()
+            and ".env" not in func[1].__doc__.lower()
+        ):
+            print(func[0])
+            print(func[1].__doc__.split("Parameters")[0])
 
 
 # main to test functions
 if __name__ == "__main__":
+    from time import sleep
+
     # uncomment the function you want to test or better yet: run `pytest`
 
     # fetchWeather()
 
-    # loginGoogle()
+    # __loginGoogle()
 
     # readEmails(timeframe="day")
 
@@ -432,5 +481,9 @@ if __name__ == "__main__":
     # toggleLight(types.LightState.OFF)
     # toggleLight(types.LightState.DEFAULT)
 
-    fetchTime()
-    pass
+    # fetchTime()
+
+    print("starting test timer")
+    testThread = remind("00:00:05", args=["finished testing the test timer"], function=glados_speak)
+
+    # help(debug=True)
