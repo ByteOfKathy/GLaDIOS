@@ -3,6 +3,8 @@ from utils.tools import prepare_text
 from scipy.io.wavfile import write
 from sys import modules as mod
 import os
+from playsound import playsound
+from time import sleep
 
 
 try:
@@ -68,19 +70,10 @@ def glados_speak(
     # 22,05 kHz sample rate
     write(output_file, 22050, audio)
 
-    if "winsound" in mod:
-        winsound.PlaySound(output_file, winsound.SND_FILENAME)
-    else:
-        # macOS
-        # call(["afplay", "./output.wav"])
-        # Linux
-        try:
-            call(["aplay", output_file])
-        except:
-            # Play audio file
-            from audioplayer import AudioPlayer
-
-            AudioPlayer(output_file).play(block=True)
+    try:
+        call(["aplay", output_file])
+    except:
+        playsound(output_file, block=False)
 
 
 """

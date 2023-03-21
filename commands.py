@@ -2,6 +2,8 @@ import datetime
 import os
 import random
 from datetime import timedelta
+import time
+from typing import Mapping
 import pytz
 from datetime import datetime
 from dotenv import load_dotenv
@@ -325,7 +327,7 @@ def toggleLight(state=xtraTypes.LightState.DEFAULT):
     pass
 
 
-def fetchTime():
+def fetchTime() -> None:
     """
     Speaks the current time.
     """
@@ -336,7 +338,7 @@ def fetchTime():
     glados_speak("It is currently {}".format(t))
 
 
-def fetchFoodMenu(day=""):
+def fetchFoodMenu(day="") -> None:
     """
     Fetches the food menu for a day.
 
@@ -397,26 +399,41 @@ def fetchFoodMenu(day=""):
         ] not in invalid_dishes else glados_speak("no valid item listed")
 
 
-def remind(time: str, reason: str, debug=False) -> None:
+def remind(
+    time: str = "00:01:00",
+    args: Mapping[str, any] | None = None,
+    function=glados_speak,
+) -> Timer | None:
     """
-    Sets a reminder for a specific time given a reason.
+    Sets a reminder for a specific time given a reason. Will run the passed function with the
+    passed arguments asynchonously after time.
 
     Parameters
     ----------
     time: the time to remind you of something as HH:MM
-    reason: the reason to remind you of something (will be spoken unless debug is True)
+    args: the arguments to pass to the function
+    function: the function to call when the time is reached
+
+    Returns
+    -------
+    Timer: the timer object that is running the reminder or None if the time is invalid
     """
     # start a thread that sleeps until the time is reached
-    # then speak the reason
+    # then run the function passed
     # Will assume the reminder is going to be in hrs and mins only (short term)
-    time = int(time.strip().split(":")[0]) * 3600 + int(time.strip().split(":")[1]) * 60
+    t = time.strip().split(":")
+    if len(t) != 3:
+        glados_speak("Invalid time format. Please use HH:MM:SS")
+        return None
+    time = int(t[0]) * 3600 + int(t[1]) * 60 + int(t[2])
     alarmThread = Timer(
-        function=glados_speak,
-        args=[reason, "output.wav", True],
+        function=function,
+        args=args,
         kwargs={},
         interval=time,
     )
     alarmThread.start()
+    return alarmThread
 
 
 def help(debug=False) -> None:
@@ -424,6 +441,7 @@ def help(debug=False) -> None:
     Lists all functions and their docs in a human readable format.
     """
     for func in getmembers(sys.modules[__name__], isfunction):
+        # smart filtering so that only my functions are printed
         if (
             not func[0].startswith("__")
             and not func[1].__doc__ is None
@@ -465,11 +483,7 @@ if __name__ == "__main__":
 
     # fetchTime()
 
-    # print("starting test timer")
-    # remind("00:01", "test", debug=True)
-    # for i in range(60):
-    #     print(i)
-    #     sleep(1)
-    # print("test timer should be finished")
+    print("starting test timer")
+    testThread = remind("00:00:05", args=["finished testing the test timer"], function=glados_speak)
 
     # help(debug=True)

@@ -77,14 +77,16 @@ class voiceProcessor(object):
             return recog_text
 
 
+
 # initialize pixels
-px = Pixels()
+# px = Pixels()
 vHandler = voiceProcessor()
+"""
 # test run px
 px.wakeup()
 time.sleep(1)
 px.off()
-
+"""
 if __name__ == "__main__":
     while True:
         # wait for wake word
