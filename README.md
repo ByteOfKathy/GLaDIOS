@@ -97,8 +97,8 @@ ex: `python3 -m venv ./venv/`
 
 `python3 commands.py`
 
-| :warning: **Warning**: This step is subject to change very soon |
-| --------------------------------------------------------------- |
+| :warning: **Warning**: This step is subject to change very soon to `python3 driver.py` |
+| -------------------------------------------------------------------------------------- |
 
 ## Common issues
 
