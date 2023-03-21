@@ -77,7 +77,6 @@ class voiceProcessor(object):
             return recog_text
 
 
-
 # initialize pixels
 # px = Pixels()
 vHandler = voiceProcessor()
@@ -132,6 +131,10 @@ if __name__ == "__main__":
                         # just fetch the menu for the next meal(s)
                     else:
                         commands.fetchFoodMenu()
+                elif "remind" or "timer" in recog_text:
+                    reason = recog_text.split("in")[:-1]
+                    t = recog_text
+                    commands.remind()
                 elif "help" in recog_text:
                     commands.help()
         # if glados is muted and we hear the wake word and unmute command
